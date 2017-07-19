@@ -32,7 +32,7 @@ Namespace My
 
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()> _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.SAP_BO_Admin_Tools.Form1
+            Me.MainForm = Global.SAP_BO_Admin_Tools.Tools
         End Sub
     End Class
 End Namespace
