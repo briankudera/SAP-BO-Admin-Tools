@@ -2,7 +2,7 @@
 Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
 
-Public Class Tools
+Public Class frmTools
 
     ' TODO: Insert code to perform custom authentication using the provided username and password 
     ' (See http://go.microsoft.com/fwlink/?LinkId=35339).  
@@ -26,6 +26,43 @@ Public Class Tools
     Private cmdCMSAuthentication As String = ""
     Private cmdTargetServer As String = ""
     Private cmdTargetDB As String = ""
+    Private cmdCommandLine As String = ""
+
+    Private Sub Tools_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        Dim arguments As String() = Environment.GetCommandLineArgs()
+
+        If arguments.Count > 1 Then
+            ConsoleMain(arguments)
+        End If
+
+        If cboCMSServer.Items.Count > 0 Then
+            cboCMSServer.SelectedIndex = 0    ' The first item has index 0 '
+        End If
+        If cboCMSAuthentication.Items.Count > 0 Then
+            cboCMSAuthentication.SelectedIndex = 0    ' The first item has index 0 '
+        End If
+
+    End Sub
+
+    Private Sub ConsoleMain(ByVal arguments() As String)
+
+        cmdCommandLine = arguments(0)
+        cmdAction = arguments(1)
+        cmdCMSServer = arguments(2)
+        cmdCMSUser = arguments(3)
+        cmdCMSUserPassword = arguments(4)
+        cmdCMSAuthentication = arguments(5)
+        cmdTargetServer = arguments(6)
+        cmdTargetDB = arguments(7)
+
+        If cmdAction = "LoadUsersToDB" Then
+            GetBOUserList(False, True, cmdTargetDB, cmdTargetServer)
+        End If
+
+        Application.Exit()
+
+    End Sub
 
     Private Sub NewBOSession()
 
@@ -103,11 +140,11 @@ Public Class Tools
                 enumerator = infoObjects.GetEnumerator
                 Do While enumerator.MoveNext
                     Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                    Dim str2 As String = current.Properties.Item("SI_NAME").Value.ToString
-                    Dim str3 As String = current.Properties.Item("SI_KIND").Value.ToString
+                    Dim strUserId As String = current.Properties.Item("SI_NAME").Value.ToString
+                    Dim strObjectKind As String = current.Properties.Item("SI_KIND").Value.ToString
                     current.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
-                    Dim textArray1 As String() = New String() {"Object updated: (", str3, ") ", str2, ChrW(13) & ChrW(10)}
-                    Me.rtbOutput.AppendText(String.Concat(textArray1))
+                    Dim txtOutput As String() = New String() {"Object updated: (", strUserId, ") ", strUserId, ChrW(13) & ChrW(10)}
+                    Me.rtbOutput.AppendText(String.Concat(txtOutput))
                 Loop
             Finally
                 If TypeOf enumerator Is IDisposable Then
@@ -204,35 +241,6 @@ Public Class Tools
 
     End Sub
 
-    Private Sub Tools_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        '  Invoke this sample with an arbitrary set of command line arguments.
-        Dim arguments As String() = Environment.GetCommandLineArgs()
-
-        If arguments.Length > 1 Then
-            cmdAction = arguments(0)
-            cmdCMSServer = arguments(1)
-            cmdCMSUser = arguments(2)
-            cmdCMSUserPassword = arguments(3)
-            cmdCMSAuthentication = arguments(4)
-            cmdTargetServer = arguments(5)
-            cmdTargetDB = arguments(6)
-            MsgBox("GetCommandLineArgs: {0}", String.Join(", ", arguments))
-        End If
-
-        If cmdAction = "LoadUsersToDB" Then
-            GetBOUserList(False, True, cmdTargetDB, cmdTargetServer)
-        End If
-
-        If cboCMSServer.Items.Count > 0 Then
-            cboCMSServer.SelectedIndex = 0    ' The first item has index 0 '
-        End If
-        If cboCMSAuthentication.Items.Count > 0 Then
-            cboCMSAuthentication.SelectedIndex = 0    ' The first item has index 0 '
-        End If
-
-    End Sub
-
     Private Sub btnGetListOfUsers_Click(sender As Object, e As EventArgs) Handles btnGetListOfUsers.Click
 
         Me.GetBOUserList(True, False)
@@ -245,7 +253,7 @@ Public Class Tools
 
     End Sub
 
-    Private Sub GetBOUserList(blnDisplay As Boolean, blnLoadDatabase As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+    Protected Sub GetBOUserList(blnDisplay As Boolean, blnLoadDatabase As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
 
         Me.NewBOSession()
 

@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <StartupObject>SAP_BO_Admin_Tools.My.MyApplication</StartupObject>
     <RootNamespace>SAP_BO_Admin_Tools</RootNamespace>
-    <AssemblyName>SAP BO Admin Tools</AssemblyName>
+    <AssemblyName>SAPBPAdminTools</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
@@ -21,7 +21,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>SAP BO Admin Tools.xml</DocumentationFile>
+    <DocumentationFile>SAPBPAdminTools.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,7 +31,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>SAP BO Admin Tools.xml</DocumentationFile>
+    <DocumentationFile>SAPBPAdminTools.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -107,10 +107,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Tools.Designer.vb">
-      <DependentUpon>Tools.vb</DependentUpon>
+    <Compile Include="frmTools.Designer.vb">
+      <DependentUpon>frmTools.vb</DependentUpon>
     </Compile>
-    <Compile Include="Tools.vb">
+    <Compile Include="frmTools.vb">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
@@ -121,8 +121,8 @@
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Tools.resx">
-      <DependentUpon>Tools.vb</DependentUpon>
+    <EmbeddedResource Include="frmTools.resx">
+      <DependentUpon>frmTools.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
