@@ -131,7 +131,7 @@ Public Class frmTools
 
         Dim intOwnerIdOld As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text)
         Dim intOwnerIdNew As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text)
-        Dim strQuery As String = ("select si_id, si_name, si_ownerid, si_kind from ci_infoobjects where si_ownerid = " & intOwnerIdOld.ToString & " and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox')")
+        Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where si_ownerid = " & intOwnerIdOld.ToString & " and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox')")
         Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
 
         If (infoObjects.Count > 0) Then
@@ -140,16 +140,32 @@ Public Class frmTools
                 enumerator = infoObjects.GetEnumerator
                 Do While enumerator.MoveNext
                     Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                    Dim strUserId As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
+                    Dim strObjectName As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                     Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
+                    Dim strObjectId As String = objCurrentObject.Properties.Item("SI_ID").Value.ToString
                     Dim blnIsInstance As Boolean = objCurrentObject.Instance
+
+                    'If instance, also set the submitterid field, if the field exists
                     If blnIsInstance Then
-                        objCurrentObject.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
-                    Else
-                        objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+
+                        'This property may not exist
+                        Dim strSubmitterId As String = ""
+                        Try
+                            strSubmitterId = objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value.ToString()
+                        Catch ex As Exception
+                            Exit Try
+                        End Try
+
+                        If strSubmitterId <> "" Then
+                            objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                        End If
                     End If
-                    Dim txtOutput As String() = New String() {"Object updated: (", strUserId, ") ", strUserId, ChrW(13) & ChrW(10)}
+
+                    objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+
+                    Dim txtOutput As String() = New String() {"Object updated: (", strObjectName, ") ", strObjectName, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
+
                 Loop
             Finally
                 If TypeOf enumerator Is IDisposable Then
@@ -162,6 +178,7 @@ Public Class frmTools
         Me.LogoffBOSession()
 
     End Sub
+
 
     Private Sub btnReplaceOwnerOnSingeDoc_Click(sender As Object, e As EventArgs) Handles btnReplaceOwnerOnSingeDoc.Click
 
@@ -183,11 +200,13 @@ Public Class frmTools
                         enumerator = infoObjects.GetEnumerator
                         Do While enumerator.MoveNext
                             Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
+                            Dim strUserId As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                             Dim strObjectName As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                             Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
-                            Dim blnIsInstance As Boolean = current.Instance
+                            Dim blnIsInstance As Boolean = objCurrentObject.Instance
                             If blnIsInstance Then
                                 objCurrentObject.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                                objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
                             Else
                                 objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
                             End If
@@ -291,6 +310,7 @@ Public Class frmTools
                         strLastLogonTime = current.Properties.Item("SI_LASTLOGONTIME").Value.ToString()
                     Catch ex As Exception
                         strLastLogonTime = "01/01/1901"
+                        Exit Try
                     End Try
 
                     Dim strDisabled = CheckIfUserIsDisabled(strUserId)
