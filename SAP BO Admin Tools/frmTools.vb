@@ -139,10 +139,15 @@ Public Class frmTools
             Try
                 enumerator = infoObjects.GetEnumerator
                 Do While enumerator.MoveNext
-                    Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                    Dim strUserId As String = current.Properties.Item("SI_NAME").Value.ToString
-                    Dim strObjectKind As String = current.Properties.Item("SI_KIND").Value.ToString
-                    current.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                    Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
+                    Dim strUserId As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
+                    Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
+                    Dim blnIsInstance As Boolean = objCurrentObject.Instance
+                    If blnIsInstance Then
+                        objCurrentObject.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                    Else
+                        objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                    End If
                     Dim txtOutput As String() = New String() {"Object updated: (", strUserId, ") ", strUserId, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
                 Loop
@@ -180,6 +185,13 @@ Public Class frmTools
                             Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
                             Dim strObjectName As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                             Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
+                            Dim blnIsInstance As Boolean = current.Instance
+                            If blnIsInstance Then
+                                objCurrentObject.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                            Else
+                                objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                            End If
+                            Dim txtOutput As String() = New String() {"Object updated: (", strUserId, ") ", strUserId, ChrW(13) & ChrW(10)}
                             objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
                             Dim textArray1 As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
                             Me.rtbOutput.AppendText(String.Concat(textArray1))
