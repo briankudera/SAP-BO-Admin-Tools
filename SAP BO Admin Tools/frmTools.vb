@@ -192,7 +192,7 @@ Public Class frmTools
             Dim intOwnerIdNew As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnSingleDocOwnerNameNew.Text)
             If (intOwnerIdNew > 0) Then
 
-                Dim strQuery As String = ("select si_id, si_name, si_ownerid, si_kind from ci_infoobjects where si_id = " & intDocId.ToString)
+                Dim strQuery As String = ("select top 100000 * from ci_infoobjects where si_id = " & intDocId.ToString)
                 Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
                 If (infoObjects.Count > 0) Then
                     Dim enumerator As IEnumerator
@@ -204,16 +204,28 @@ Public Class frmTools
                             Dim strObjectName As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                             Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
                             Dim blnIsInstance As Boolean = objCurrentObject.Instance
+                            Dim strObjectId As String = objCurrentObject.Properties.Item("SI_ID").Value.ToString
+
+                            'If instance, also set the submitterid field, if the field exists
                             If blnIsInstance Then
-                                objCurrentObject.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
-                                objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
-                            Else
-                                objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+
+                                'This property may not exist
+                                Dim strSubmitterId As String = ""
+                                Try
+                                    strSubmitterId = objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value.ToString()
+                                Catch ex As Exception
+                                    Exit Try
+                                End Try
+
+                                If strSubmitterId <> "" Then
+                                    objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                                End If
                             End If
-                            Dim txtOutput As String() = New String() {"Object updated: (", strUserId, ") ", strUserId, ChrW(13) & ChrW(10)}
+
                             objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
-                            Dim textArray1 As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
-                            Me.rtbOutput.AppendText(String.Concat(textArray1))
+
+                            Dim txtOutput As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
+                            Me.rtbOutput.AppendText(String.Concat(txtOutput))
                         Loop
                     Finally
                         If TypeOf enumerator Is IDisposable Then
