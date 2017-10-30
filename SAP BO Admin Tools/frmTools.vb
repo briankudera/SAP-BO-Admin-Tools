@@ -58,6 +58,8 @@ Public Class frmTools
 
         If cmdAction = "LoadUsersToDB" Then
             GetBOUserList(False, True, cmdTargetDB, cmdTargetServer)
+        ElseIf cmdAction = "LoadObjectsToDB" Then
+            GetBOObjectList(False, True, cmdTargetDB, cmdTargetServer)
         End If
 
         Application.Exit()
@@ -440,6 +442,33 @@ Public Class frmTools
 
     End Sub
 
+
+    Private Sub CreateUserTableForRepo()
+
+        ExecuteQuery("if Not exists " _
+                        & "(select 1 from sysobjects where name='DimSAPBOObject_Stg' and xtype='U') " _
+                        & "create table DimSAPBOObject_Stg (" _
+                        & "    SI_ID int not null primary key" _
+                        & "   ,SI_CUID varchar(64) not null" _
+                        & "   ,SI_NAME varchar(255) null" _
+                        & "   ,SI_OWNER varchar(255) null" _
+                        & "   ,SI_PARENT_FOLDER int null" _
+                        & "   ,SI_INSTANCE bit null default 0" _
+                        & "   ,SI_SIZE int null" _
+                        & "   ,SI_PARENTID int null" _
+                        & "   ,SI_UPDATE_TS datetime null" _
+                        & "   ,SI_CREATION_TIME datetime null" _
+                        & "   ,SI_KIND varchar(255) null" _
+                        & "   ,SI_HAS_CHILDREN bit null default 0" _
+                        & "   ,SI_RECURRING bit null default 0" _
+                        & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
+                        & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
+                        & " )")
+
+        ExecuteQuery("truncate table DimSAPBOObject_Stg")
+
+    End Sub
+
     Private Sub LoadUserToDatabase(strUserID As String, strCUID As String, strName As String, strFullName As String, strDescription As String, strEmailAddress As String, strLastLogonTime As String, strDisabled As String)
 
         Dim strQuery As String
@@ -510,6 +539,46 @@ Public Class frmTools
 
     End Sub
 
+    Private Sub LoadObjectToDatabase(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
+
+        Dim strQuery As String
+
+        strQuery = "INSERT INTO dbo.DimSAPBOObject_Stg" _
+                 & "     ( SI_ID" _
+                 & "      ,SI_CUID" _
+                 & "      ,SI_NAME" _
+                 & "      ,SI_OWNER" _
+                 & "      ,SI_PARENT_FOLDER" _
+                 & "      ,SI_INSTANCE" _
+                 & "      ,SI_SIZE" _
+                 & "      ,SI_PARENTID" _
+                 & "      ,SI_UPDATE_TS" _
+                 & "      ,SI_CREATION_TIME" _
+                 & "      ,SI_KIND" _
+                 & "      ,SI_HAS_CHILDREN" _
+                 & "      ,SI_RECURRING" _
+                 & "     )" _
+                 & "VALUES" _
+                 & "     (" _
+                 & "          " + strId + "                  " _
+                 & "         ,'" + strCUID + "'              " _
+                 & "         ,'" + strName + "'              " _
+                 & "         ,'" + strOwner + "'             " _
+                 & "         ," + intParentFolder + "        " _
+                 & "         ," + blnInstance + "            " _
+                 & "         ," + intSize + "                " _
+                 & "         ," + intParentId + "            " _
+                 & "         ,'" + dteUpdateTimestamp + "'   " _
+                 & "         ,'" + dteCreationTimestamp + "' " _
+                 & "         ,'" + strKind + "'              " _
+                 & "         ," + blnHasChildren + "         " _
+                 & "         ," + blnRecurring + "           " _
+                 & "     )"
+
+        ExecuteQuery(strQuery)
+
+    End Sub
+
 
     Private Sub SetSQLConnection(strDB As String, strServer As String)
 
@@ -530,5 +599,73 @@ Public Class frmTools
 
     End Sub
 
+    Private Sub btnExtractRepo_Click(sender As Object, e As EventArgs) Handles btnExtractRepo.Click
+
+        GetBOObjectList(False, True, txtExtractRepoDatabaseName.Text.ToString(), txtExtractRepoSQLServer.Text.ToString())
+
+    End Sub
+
+    Protected Sub GetBOObjectList(blnDisplay As Boolean, blnLoadDatabase As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+
+        Me.NewBOSession()
+
+        Dim strQuery As String = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder')")
+        Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
+
+        If (objects.Count > 0) Then
+
+            SetSQLConnection(strDatabaseName, strSQLServerName)
+
+            'Create stage table
+            CreateUserTableForRepo()
+
+            Dim enumerator As IEnumerator
+            Try
+                enumerator = objects.GetEnumerator
+                Do While enumerator.MoveNext
+                    Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
+                    Dim strId As String = current.Properties.Item("SI_ID").Value.ToString()
+                    Dim strCUID As String = current.Properties.Item("SI_CUID").Value.ToString()
+                    Dim strName As String = Replace(current.Properties.Item("SI_NAME").Value.ToString(), "'", "''")
+                    Dim strOwner As String = current.Properties.Item("SI_OWNER").Value.ToString()
+                    Dim intParentFolder As String = current.Properties.Item("SI_PARENT_FOLDER").Value.ToString()
+                    Dim blnInstance As String = If(current.Properties.Item("SI_INSTANCE").Value.ToString() = "False", "0", "1")
+                    Dim intParentId As String = current.Properties.Item("SI_PARENTID").Value.ToString()
+                    Dim dteUpdateTimestamp As String = current.Properties.Item("SI_UPDATE_TS").Value.ToString()
+                    Dim dteCreationTimestamp As String = current.Properties.Item("SI_CREATION_TIME").Value.ToString()
+                    Dim strKind As String = current.Properties.Item("SI_KIND").Value.ToString()
+                    Dim blnHasChildren As String = If(current.Properties.Item("SI_HAS_CHILDREN").Value.ToString() = "False", "0", "1")
+
+                    'This property may not exist
+                    Dim intSize As String
+                    Try
+                        intSize = current.Properties.Item("SI_SIZE").Value.ToString()
+                    Catch ex As Exception
+                        intSize = 0
+                        Exit Try
+                    End Try
+
+                    'This property may not exist
+                    Dim blnRecurring As String
+                    Try
+                        blnRecurring = If(current.Properties.Item("SI_RECURRING").Value.ToString() = "False", "0", "1")
+                    Catch ex As Exception
+                        blnRecurring = 0
+                        Exit Try
+                    End Try
+
+                    LoadObjectToDatabase(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
+
+                Loop
+            Finally
+                If TypeOf enumerator Is IDisposable Then
+                    TryCast(enumerator, IDisposable).Dispose()
+                End If
+            End Try
+        End If
+
+        Me.LogoffBOSession()
+
+    End Sub
 
 End Class

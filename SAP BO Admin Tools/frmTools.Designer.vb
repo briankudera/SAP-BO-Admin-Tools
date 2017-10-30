@@ -58,8 +58,6 @@ Partial Class frmTools
         Me.Label5 = New System.Windows.Forms.Label()
         Me.txtReplaceOwnerOnSingleDocDocId = New System.Windows.Forms.TextBox()
         Me.Label6 = New System.Windows.Forms.Label()
-        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
-        Me.Label8 = New System.Windows.Forms.Label()
         Me.tabGetListOfUsers = New System.Windows.Forms.TabPage()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.btnGetListOfUsers = New System.Windows.Forms.Button()
@@ -70,6 +68,14 @@ Partial Class frmTools
         Me.Label9 = New System.Windows.Forms.Label()
         Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
         Me.Label10 = New System.Windows.Forms.Label()
+        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.tabExtractRepo = New System.Windows.Forms.TabPage()
+        Me.btnExtractRepo = New System.Windows.Forms.Button()
+        Me.txtExtractRepoDatabaseName = New System.Windows.Forms.TextBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.txtExtractRepoSQLServer = New System.Windows.Forms.TextBox()
+        Me.Label12 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -82,6 +88,7 @@ Partial Class frmTools
         Me.GroupBox5.SuspendLayout()
         Me.tabLoadListOfUsersToDB.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
+        Me.tabExtractRepo.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -180,6 +187,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabReplaceOwnerOnSingleDoc)
         Me.tabFunctions.Controls.Add(Me.tabGetListOfUsers)
         Me.tabFunctions.Controls.Add(Me.tabLoadListOfUsersToDB)
+        Me.tabFunctions.Controls.Add(Me.tabExtractRepo)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -365,23 +373,6 @@ Partial Class frmTools
         Me.Label6.Text = "&Document ID:"
         Me.Label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
-        'rtbOutput
-        '
-        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
-        Me.rtbOutput.Name = "rtbOutput"
-        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
-        Me.rtbOutput.TabIndex = 11
-        Me.rtbOutput.Text = ""
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(8, 274)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(39, 13)
-        Me.Label8.TabIndex = 12
-        Me.Label8.Text = "Output"
-        '
         'tabGetListOfUsers
         '
         Me.tabGetListOfUsers.Controls.Add(Me.GroupBox5)
@@ -479,7 +470,82 @@ Partial Class frmTools
         Me.Label10.Text = "&SQL Server:"
         Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
-        'Tools
+        'rtbOutput
+        '
+        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
+        Me.rtbOutput.Name = "rtbOutput"
+        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
+        Me.rtbOutput.TabIndex = 11
+        Me.rtbOutput.Text = ""
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(8, 274)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(39, 13)
+        Me.Label8.TabIndex = 12
+        Me.Label8.Text = "Output"
+        '
+        'tabExtractRepo
+        '
+        Me.tabExtractRepo.Controls.Add(Me.txtExtractRepoDatabaseName)
+        Me.tabExtractRepo.Controls.Add(Me.Label11)
+        Me.tabExtractRepo.Controls.Add(Me.txtExtractRepoSQLServer)
+        Me.tabExtractRepo.Controls.Add(Me.Label12)
+        Me.tabExtractRepo.Controls.Add(Me.btnExtractRepo)
+        Me.tabExtractRepo.Location = New System.Drawing.Point(4, 22)
+        Me.tabExtractRepo.Name = "tabExtractRepo"
+        Me.tabExtractRepo.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabExtractRepo.Size = New System.Drawing.Size(550, 92)
+        Me.tabExtractRepo.TabIndex = 5
+        Me.tabExtractRepo.Text = "Extract Repo"
+        Me.tabExtractRepo.UseVisualStyleBackColor = True
+        '
+        'btnExtractRepo
+        '
+        Me.btnExtractRepo.Location = New System.Drawing.Point(358, 30)
+        Me.btnExtractRepo.Name = "btnExtractRepo"
+        Me.btnExtractRepo.Size = New System.Drawing.Size(75, 39)
+        Me.btnExtractRepo.TabIndex = 0
+        Me.btnExtractRepo.Text = "Extract Repo"
+        Me.btnExtractRepo.UseVisualStyleBackColor = True
+        '
+        'txtExtractRepoDatabaseName
+        '
+        Me.txtExtractRepoDatabaseName.Location = New System.Drawing.Point(107, 32)
+        Me.txtExtractRepoDatabaseName.Name = "txtExtractRepoDatabaseName"
+        Me.txtExtractRepoDatabaseName.Size = New System.Drawing.Size(220, 20)
+        Me.txtExtractRepoDatabaseName.TabIndex = 14
+        Me.txtExtractRepoDatabaseName.Text = "BI_Configuration"
+        '
+        'Label11
+        '
+        Me.Label11.Location = New System.Drawing.Point(7, 30)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(105, 23)
+        Me.Label11.TabIndex = 13
+        Me.Label11.Text = "&Database Name:"
+        Me.Label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtExtractRepoSQLServer
+        '
+        Me.txtExtractRepoSQLServer.Location = New System.Drawing.Point(107, 6)
+        Me.txtExtractRepoSQLServer.Name = "txtExtractRepoSQLServer"
+        Me.txtExtractRepoSQLServer.Size = New System.Drawing.Size(220, 20)
+        Me.txtExtractRepoSQLServer.TabIndex = 12
+        Me.txtExtractRepoSQLServer.Text = "SQLAG02"
+        '
+        'Label12
+        '
+        Me.Label12.Location = New System.Drawing.Point(7, 4)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(105, 23)
+        Me.Label12.TabIndex = 11
+        Me.Label12.Text = "&SQL Server:"
+        Me.Label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'frmTools
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -500,7 +566,7 @@ Partial Class frmTools
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "Tools"
+        Me.Name = "frmTools"
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Tools"
@@ -520,6 +586,8 @@ Partial Class frmTools
         Me.tabLoadListOfUsersToDB.ResumeLayout(False)
         Me.GroupBox6.ResumeLayout(False)
         Me.GroupBox6.PerformLayout()
+        Me.tabExtractRepo.ResumeLayout(False)
+        Me.tabExtractRepo.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -563,4 +631,10 @@ Partial Class frmTools
     Friend WithEvents Label9 As Label
     Friend WithEvents txtLoadListOfUsersToDBSQLServerName As TextBox
     Friend WithEvents Label10 As Label
+    Friend WithEvents tabExtractRepo As TabPage
+    Friend WithEvents txtExtractRepoDatabaseName As TextBox
+    Friend WithEvents Label11 As Label
+    Friend WithEvents txtExtractRepoSQLServer As TextBox
+    Friend WithEvents Label12 As Label
+    Friend WithEvents btnExtractRepo As Button
 End Class
