@@ -133,7 +133,7 @@ Public Class frmTools
 
         Dim intOwnerIdOld As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text)
         Dim intOwnerIdNew As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text)
-        Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where si_ownerid = " & intOwnerIdOld.ToString & " and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox')")
+        Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where (si_ownerid = " & intOwnerIdOld.ToString & " or si_author = '" & Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text & "') and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox')")
         Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
 
         If (infoObjects.Count > 0) Then
@@ -161,9 +161,11 @@ Public Class frmTools
                         If strSubmitterId <> "" Then
                             objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
                         End If
+
                     End If
 
                     objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                    objCurrentObject.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
 
                     Dim txtOutput As String() = New String() {"Object updated: (", strObjectName, ") ", strObjectName, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
