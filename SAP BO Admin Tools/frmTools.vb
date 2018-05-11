@@ -133,7 +133,7 @@ Public Class frmTools
 
         Dim intOwnerIdOld As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text)
         Dim intOwnerIdNew As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text)
-        Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where (si_ownerid = " & intOwnerIdOld.ToString & " or si_author = '" & Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text & "') and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox')")
+        Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where (si_ownerid = " & intOwnerIdOld.ToString & " or si_author = '" & Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text & "' or si_under_favorites = " & intOwnerIdOld.ToString & ") and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox') and si_name != '~WebIntelligence'")
         Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
 
         If (infoObjects.Count > 0) Then
@@ -146,6 +146,30 @@ Public Class frmTools
                     Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
                     Dim strObjectId As String = objCurrentObject.Properties.Item("SI_ID").Value.ToString
                     Dim blnIsInstance As Boolean = objCurrentObject.Instance
+
+                    'See if this property exists
+                    Dim strUnderFavorites As String = ""
+                    Try
+                        strUnderFavorites = objCurrentObject.Properties.Item("SI_UNDER_FAVORITES").Value.ToString()
+                    Catch ex As Exception
+                        Exit Try
+                    End Try
+
+                    If strUnderFavorites <> "" Then
+                        objCurrentObject.Properties.Item("SI_UNDER_FAVORITES").Value = intOwnerIdNew
+                    End If
+
+                    'See if this property exists
+                    Dim strAuthor As String = ""
+                    Try
+                        strAuthor = objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value.ToString()
+                    Catch ex As Exception
+                        Exit Try
+                    End Try
+
+                    If strAuthor <> "" Then
+                        objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
+                    End If
 
                     'If instance, also set the submitterid field, if the field exists
                     If blnIsInstance Then
@@ -165,7 +189,6 @@ Public Class frmTools
                     End If
 
                     objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
-                    objCurrentObject.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
 
                     Dim txtOutput As String() = New String() {"Object updated: (", strObjectName, ") ", strObjectName, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
