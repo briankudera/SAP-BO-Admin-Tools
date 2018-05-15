@@ -160,15 +160,27 @@ Public Class frmTools
                     End If
 
                     'See if this property exists
+                    Dim strAuthorSchedule As String = ""
+                    Try
+                        strAuthorSchedule = objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value.ToString()
+                    Catch ex As Exception
+                        Exit Try
+                    End Try
+
+                    If strAuthorSchedule <> "" Then
+                        objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
+                    End If
+
+                    'See if this property exists
                     Dim strAuthor As String = ""
                     Try
-                        strAuthor = objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value.ToString()
+                        strAuthor = objCurrentObject.Properties.Item("SI_AUTHOR").Value.ToString()
                     Catch ex As Exception
                         Exit Try
                     End Try
 
                     If strAuthor <> "" Then
-                        objCurrentObject.SchedulingInfo.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
+                        objCurrentObject.Properties.Item("SI_AUTHOR").Value = Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text
                     End If
 
                     'If instance, also set the submitterid field, if the field exists
