@@ -1,6 +1,7 @@
 ﻿Imports CrystalDecisions.Enterprise
 Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
+Imports CrystalDecisions.Enterprise.SecurityInfo
 
 Public Class frmTools
 
@@ -130,7 +131,6 @@ Public Class frmTools
     Private Sub btnRepalceOwnerOnAllObjects_Click(sender As Object, e As EventArgs) Handles btnRepalceOwnerOnAllObjects.Click
 
         Me.NewBOSession()
-
         Dim intOwnerIdOld As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text)
         Dim intOwnerIdNew As Integer = Me.GetIdForUser(Me.txtReplaceOwnerOnAllObjectsOwnerNameNew.Text)
         Dim strQuery As String = ("select top 1000000 * from ci_infoobjects where (si_ownerid = " & intOwnerIdOld.ToString & " or si_author = '" & Me.txtReplaceOwnerOnAllObjectsOwnerNameOld.Text & "' or si_under_favorites = " & intOwnerIdOld.ToString & ") and si_kind not in ('FavoritesFolder','PersonalCategory','Inbox') and si_name != '~WebIntelligence'")
@@ -705,4 +705,51 @@ Public Class frmTools
 
     End Sub
 
+    Private Sub btnAddDBCredentialsForGroup_Click(sender As Object, e As EventArgs) Handles btnAddDBCredentialsForGroup.Click
+
+        Me.NewBOSession()
+        Dim txtAddDBCredentialsPW As String = Me.GetIdForUser(Me.txtAddDBCredentialsPW.Text)
+        Dim strQuery As String = ("select top 1000000 SI_ID, SI_NAME, SI_DATA, SI_2ND_CREDS from ci_systemobjects where SI_KIND='User' and SI_NAME = 'BrianK'")
+        Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
+        Dim txtOutput As String()
+        Dim strUserName As String
+
+        If (infoObjects.Count > 0) Then
+            Dim enumerator As IEnumerator
+            Try
+                enumerator = infoObjects.GetEnumerator
+                Do While enumerator.MoveNext
+
+                    Dim objCurrentUser As UserInfo = DirectCast(enumerator.Current, UserInfo)
+
+                    strUserName = objCurrentUser.UserName.ToString
+
+                    'See if this property exists
+                    Dim strDBUser As String = ""
+                    Try
+                        strDBUser = objCurrentUser.GetProfileString("DBUSER")
+                    Catch ex As Exception
+                        Exit Try
+                    End Try
+
+                    If strDBUser = "" Then
+                        objCurrentUser.SetProfileString("DBUSER", strUserName)
+                        objCurrentUser.SetSecondaryCredential("DBPASS", "")
+
+                        txtOutput = {"Object updated: (", strDBUser, ") ", strUserName, ChrW(13) & ChrW(10)}
+                        Me.rtbOutput.AppendText(String.Concat(txtOutput))
+                    End If
+
+                Loop
+            Finally
+                If TypeOf enumerator Is IDisposable Then
+                    TryCast(enumerator, IDisposable).Dispose()
+                End If
+            End Try
+            Me.boInfoStore.Commit(infoObjects)
+        End If
+
+        Me.LogoffBOSession()
+
+    End Sub
 End Class

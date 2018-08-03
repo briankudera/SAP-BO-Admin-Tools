@@ -68,14 +68,21 @@ Partial Class frmTools
         Me.Label9 = New System.Windows.Forms.Label()
         Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
         Me.Label10 = New System.Windows.Forms.Label()
-        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
-        Me.Label8 = New System.Windows.Forms.Label()
         Me.tabExtractRepo = New System.Windows.Forms.TabPage()
-        Me.btnExtractRepo = New System.Windows.Forms.Button()
         Me.txtExtractRepoDatabaseName = New System.Windows.Forms.TextBox()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.txtExtractRepoSQLServer = New System.Windows.Forms.TextBox()
         Me.Label12 = New System.Windows.Forms.Label()
+        Me.btnExtractRepo = New System.Windows.Forms.Button()
+        Me.tabAddDBCredentials = New System.Windows.Forms.TabPage()
+        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.btnAddDBCredentialsForGroup = New System.Windows.Forms.Button()
+        Me.txtGroupNameToProcess = New System.Windows.Forms.TextBox()
+        Me.Label14 = New System.Windows.Forms.Label()
+        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.txtAddDBCredentialsPW = New System.Windows.Forms.TextBox()
+        Me.Label13 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -89,6 +96,8 @@ Partial Class frmTools
         Me.tabLoadListOfUsersToDB.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
         Me.tabExtractRepo.SuspendLayout()
+        Me.tabAddDBCredentials.SuspendLayout()
+        Me.GroupBox7.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -188,6 +197,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabGetListOfUsers)
         Me.tabFunctions.Controls.Add(Me.tabLoadListOfUsersToDB)
         Me.tabFunctions.Controls.Add(Me.tabExtractRepo)
+        Me.tabFunctions.Controls.Add(Me.tabAddDBCredentials)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -470,23 +480,6 @@ Partial Class frmTools
         Me.Label10.Text = "&SQL Server:"
         Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
-        'rtbOutput
-        '
-        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
-        Me.rtbOutput.Name = "rtbOutput"
-        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
-        Me.rtbOutput.TabIndex = 11
-        Me.rtbOutput.Text = ""
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(8, 274)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(39, 13)
-        Me.Label8.TabIndex = 12
-        Me.Label8.Text = "Output"
-        '
         'tabExtractRepo
         '
         Me.tabExtractRepo.Controls.Add(Me.txtExtractRepoDatabaseName)
@@ -501,15 +494,6 @@ Partial Class frmTools
         Me.tabExtractRepo.TabIndex = 5
         Me.tabExtractRepo.Text = "Extract Repo"
         Me.tabExtractRepo.UseVisualStyleBackColor = True
-        '
-        'btnExtractRepo
-        '
-        Me.btnExtractRepo.Location = New System.Drawing.Point(358, 30)
-        Me.btnExtractRepo.Name = "btnExtractRepo"
-        Me.btnExtractRepo.Size = New System.Drawing.Size(75, 39)
-        Me.btnExtractRepo.TabIndex = 0
-        Me.btnExtractRepo.Text = "Extract Repo"
-        Me.btnExtractRepo.UseVisualStyleBackColor = True
         '
         'txtExtractRepoDatabaseName
         '
@@ -544,6 +528,97 @@ Partial Class frmTools
         Me.Label12.TabIndex = 11
         Me.Label12.Text = "&SQL Server:"
         Me.Label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'btnExtractRepo
+        '
+        Me.btnExtractRepo.Location = New System.Drawing.Point(358, 30)
+        Me.btnExtractRepo.Name = "btnExtractRepo"
+        Me.btnExtractRepo.Size = New System.Drawing.Size(75, 39)
+        Me.btnExtractRepo.TabIndex = 0
+        Me.btnExtractRepo.Text = "Extract Repo"
+        Me.btnExtractRepo.UseVisualStyleBackColor = True
+        '
+        'tabAddDBCredentials
+        '
+        Me.tabAddDBCredentials.Controls.Add(Me.GroupBox7)
+        Me.tabAddDBCredentials.Location = New System.Drawing.Point(4, 22)
+        Me.tabAddDBCredentials.Name = "tabAddDBCredentials"
+        Me.tabAddDBCredentials.Size = New System.Drawing.Size(550, 92)
+        Me.tabAddDBCredentials.TabIndex = 6
+        Me.tabAddDBCredentials.Text = "Add DB Credentials"
+        Me.tabAddDBCredentials.UseVisualStyleBackColor = True
+        '
+        'GroupBox7
+        '
+        Me.GroupBox7.Controls.Add(Me.txtAddDBCredentialsPW)
+        Me.GroupBox7.Controls.Add(Me.Label13)
+        Me.GroupBox7.Controls.Add(Me.btnAddDBCredentialsForGroup)
+        Me.GroupBox7.Controls.Add(Me.txtGroupNameToProcess)
+        Me.GroupBox7.Controls.Add(Me.Label14)
+        Me.GroupBox7.Location = New System.Drawing.Point(7, 7)
+        Me.GroupBox7.Name = "GroupBox7"
+        Me.GroupBox7.Size = New System.Drawing.Size(537, 79)
+        Me.GroupBox7.TabIndex = 2
+        Me.GroupBox7.TabStop = False
+        Me.GroupBox7.Text = "Enter Info"
+        '
+        'btnAddDBCredentialsForGroup
+        '
+        Me.btnAddDBCredentialsForGroup.Location = New System.Drawing.Point(347, 19)
+        Me.btnAddDBCredentialsForGroup.Name = "btnAddDBCredentialsForGroup"
+        Me.btnAddDBCredentialsForGroup.Size = New System.Drawing.Size(184, 21)
+        Me.btnAddDBCredentialsForGroup.TabIndex = 11
+        Me.btnAddDBCredentialsForGroup.Text = "Add DB Credentials for Group"
+        Me.btnAddDBCredentialsForGroup.UseVisualStyleBackColor = True
+        '
+        'txtGroupNameToProcess
+        '
+        Me.txtGroupNameToProcess.Location = New System.Drawing.Point(76, 19)
+        Me.txtGroupNameToProcess.Name = "txtGroupNameToProcess"
+        Me.txtGroupNameToProcess.Size = New System.Drawing.Size(252, 20)
+        Me.txtGroupNameToProcess.TabIndex = 8
+        '
+        'Label14
+        '
+        Me.Label14.Location = New System.Drawing.Point(8, 17)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(105, 23)
+        Me.Label14.TabIndex = 7
+        Me.Label14.Text = "&Group Name:"
+        Me.Label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'rtbOutput
+        '
+        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
+        Me.rtbOutput.Name = "rtbOutput"
+        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
+        Me.rtbOutput.TabIndex = 11
+        Me.rtbOutput.Text = ""
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(8, 274)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(39, 13)
+        Me.Label8.TabIndex = 12
+        Me.Label8.Text = "Output"
+        '
+        'txtAddDBCredentialsPW
+        '
+        Me.txtAddDBCredentialsPW.Location = New System.Drawing.Point(76, 45)
+        Me.txtAddDBCredentialsPW.Name = "txtAddDBCredentialsPW"
+        Me.txtAddDBCredentialsPW.Size = New System.Drawing.Size(252, 20)
+        Me.txtAddDBCredentialsPW.TabIndex = 13
+        '
+        'Label13
+        '
+        Me.Label13.Location = New System.Drawing.Point(8, 43)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(105, 23)
+        Me.Label13.TabIndex = 12
+        Me.Label13.Text = "&Password:"
+        Me.Label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'frmTools
         '
@@ -588,6 +663,9 @@ Partial Class frmTools
         Me.GroupBox6.PerformLayout()
         Me.tabExtractRepo.ResumeLayout(False)
         Me.tabExtractRepo.PerformLayout()
+        Me.tabAddDBCredentials.ResumeLayout(False)
+        Me.GroupBox7.ResumeLayout(False)
+        Me.GroupBox7.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -637,4 +715,11 @@ Partial Class frmTools
     Friend WithEvents txtExtractRepoSQLServer As TextBox
     Friend WithEvents Label12 As Label
     Friend WithEvents btnExtractRepo As Button
+    Friend WithEvents tabAddDBCredentials As TabPage
+    Friend WithEvents GroupBox7 As GroupBox
+    Friend WithEvents btnAddDBCredentialsForGroup As Button
+    Friend WithEvents txtGroupNameToProcess As TextBox
+    Friend WithEvents Label14 As Label
+    Friend WithEvents txtAddDBCredentialsPW As TextBox
+    Friend WithEvents Label13 As Label
 End Class
