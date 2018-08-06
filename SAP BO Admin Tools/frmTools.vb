@@ -58,9 +58,10 @@ Public Class frmTools
         cmdTargetDB = arguments(7)
 
         If cmdAction = "LoadUsersToDB" Then
-            GetBOUserList(False, True, cmdTargetDB, cmdTargetServer)
+            GetBOUserList(False, cmdTargetDB, cmdTargetServer)
+            GetBOUserList(False, cmdTargetDB, cmdTargetServer)
         ElseIf cmdAction = "LoadObjectsToDB" Then
-            GetBOObjectList(False, True, cmdTargetDB, cmdTargetServer)
+            GetBOObjectList(False, cmdTargetDB, cmdTargetServer)
         End If
 
         Application.Exit()
@@ -325,17 +326,17 @@ Public Class frmTools
 
     Private Sub btnGetListOfUsers_Click(sender As Object, e As EventArgs) Handles btnGetListOfUsers.Click
 
-        Me.GetBOUserList(True, False)
+        Me.GetBOUserList(True)
 
     End Sub
 
     Private Sub btnLoadListOfUsersToDB_Click(sender As Object, e As EventArgs) Handles btnLoadListOfUsersToDB.Click
 
-        GetBOUserList(False, True, Me.txtLoadListOfUsersToDBDatabaseName.Text.ToString(), Me.txtLoadListOfUsersToDBSQLServerName.Text.ToString())
+        GetBOUserList(False, Me.txtLoadListOfUsersToDBDatabaseName.Text.ToString(), Me.txtLoadListOfUsersToDBSQLServerName.Text.ToString())
 
     End Sub
 
-    Protected Sub GetBOUserList(blnDisplay As Boolean, blnLoadDatabase As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+    Protected Sub GetBOUserList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
 
         Me.NewBOSession()
 
@@ -343,6 +344,12 @@ Public Class frmTools
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
 
         If (objects.Count > 0) Then
+
+            SetSQLConnection(strDatabaseName, strSQLServerName)
+
+            'Create stage table
+            CreateUserTableForRepo()
+
             Dim enumerator As IEnumerator
             Try
                 enumerator = objects.GetEnumerator
@@ -371,11 +378,7 @@ Public Class frmTools
                         Me.rtbOutput.AppendText(String.Concat(arrResults))
                     End If
 
-                    If blnLoadDatabase Then
-                        Me.SetSQLConnection(strDatabaseName, strSQLServerName)
-                        CreateUserTable()
-                        LoadUserToDatabase(strUserId, strCUID, strName, strFullName, strDescription, strEmailAddress, strLastLogonTime, strDisabled)
-                    End If
+                    LoadUserToDatabaseStg(strUserId, strCUID, strName, strFullName, strDescription, strEmailAddress, strLastLogonTime, strDisabled)
 
                 Loop
             Finally
@@ -459,13 +462,13 @@ Public Class frmTools
 
     End Function
 
-    Private Sub CreateUserTable()
+    Private Sub CreateUserTableForRepo()
 
         ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOUser' and xtype='U') " _
-                        & "create table DimSAPBOUser (" _
+                        & "(select 1 from sysobjects where name='DimSAPBOUser_Stg' and xtype='U') " _
+                        & "create table DimSAPBOUser_Stg (" _
                         & "    SI_ID int not null primary key" _
-                        & "   , SI_CUID varchar(64) Not null" _
+                        & "   ,SI_CUID varchar(64) Not null" _
                         & "   ,SI_NAME varchar(100) not null" _
                         & "   ,SI_USERFULLNAME varchar(255) null" _
                         & "   ,SI_DESCRIPTION varchar(max) null" _
@@ -477,10 +480,12 @@ Public Class frmTools
                         & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
                         & " )")
 
+        ExecuteQuery("truncate table DimSAPBOUser_Stg")
+
     End Sub
 
 
-    Private Sub CreateUserTableForRepo()
+    Private Sub CreateObjectTableForRepo()
 
         ExecuteQuery("if Not exists " _
                         & "(select 1 from sysobjects where name='DimSAPBOObject_Stg' and xtype='U') " _
@@ -506,77 +511,38 @@ Public Class frmTools
 
     End Sub
 
-    Private Sub LoadUserToDatabase(strUserID As String, strCUID As String, strName As String, strFullName As String, strDescription As String, strEmailAddress As String, strLastLogonTime As String, strDisabled As String)
+
+    Private Sub LoadUserToDatabaseStg(strID As String, strCUID As String, strName As String, strFullName As String, strDescription As String, strEmailAddress As String, strLastLogonTime As String, strDisabled As String)
 
         Dim strQuery As String
 
-        strQuery = "merge " _
-                   & "      DimSAPBOUser As tgt" _
-                   & " Using " _
-                   & "     (" _
-                   & "         Select " _
-                   & "             " + strUserID + " As SI_ID" _
-                   & "             ,'" + strCUID + "' As SI_CUID " _
-                   & "             , '" + strName + "' As SI_NAME " _
-                   & "             , '" + strFullName + "' As SI_USERFULLNAME" _
-                   & "             , '" + strDescription + "' As SI_DESCRIPTION" _
-                   & "             , '" + strEmailAddress + "' As SI_EMAIL_ADDRESS" _
-                   & "             , '" + strLastLogonTime + "' As SI_LASTLOGONTIME" _
-                   & "             , " + strDisabled + " As Disabled" _
-                   & "      ) As src" _
-                   & " On tgt.SI_ID = src.SI_ID" _
-                   & " When matched And" _
-                   & " ( " _
-                   & "     IsNull(tgt.SI_NAME, '') <> IsNull(src.SI_NAME, '')" _
-                   & "  Or IsNull(tgt.SI_USERFULLNAME, '') <> IsNull(src.SI_USERFULLNAME, '')" _
-                   & "  Or IsNull(tgt.SI_DESCRIPTION, '') <> IsNull(src.SI_DESCRIPTION, '')" _
-                   & "  Or IsNull(tgt.SI_EMAIL_ADDRESS, '') <> IsNull(src.SI_EMAIL_ADDRESS, '')" _
-                   & "  Or IsNull(tgt.SI_LASTLOGONTIME, '') <> IsNull(src.SI_LASTLOGONTIME, '')" _
-                   & "  Or tgt.Disabled <> src.Disabled" _
-                   & " )" _
-                   & " then update " _
-                   & " set " _
-                   & "      tgt.SI_NAME               = src.SI_NAME " _
-                   & "     ,tgt.SI_USERFULLNAME       = src.SI_USERFULLNAME " _
-                   & "     ,tgt.SI_DESCRIPTION        = src.SI_DESCRIPTION " _
-                   & "     ,tgt.SI_EMAIL_ADDRESS      = src.SI_EMAIL_ADDRESS " _
-                   & "     ,tgt.SI_LASTLOGONTIME      = src.SI_LASTLOGONTIME " _
-                   & "     ,tgt.Disabled              = src.Disabled " _
-                   & "     ,tgt.RecordUpdateTimestamp = sysdatetime() " _
-                   & " when not matched by target then" _
-                   & " insert (" _
-                   & "             SI_ID" _
-                   & "            ,SI_CUID" _
-                   & "            ,SI_NAME" _
-                   & "            ,SI_USERFULLNAME" _
-                   & "            ,SI_DESCRIPTION" _
-                   & "            ,SI_EMAIL_ADDRESS" _
-                   & "            ,SI_LASTLOGONTIME" _
-                   & "            ,Disabled" _
-                   & "        )" _
-                   & " values" _
-                   & "        (" _
-                   & "             " + strUserID + "" _
-                   & "             , '" + strCUID + "'" _
-                   & "             , '" + strName + "'" _
-                   & "             , '" + strFullName + "'" _
-                   & "             , '" + strDescription + "'" _
-                   & "             , '" + strEmailAddress + "'" _
-                   & "             , '" + strLastLogonTime + "'" _
-                   & "             , " + strDisabled + "" _
-                   & "        )" _
-                   & " when not matched by source " _
-                   & "      and tgt.SI_ID = " + strUserID + " then " _
-                   & "        update set " _
-                   & "             tgt.Deleted = 1" _
-                   & "            ,tgt.Disabled = 1" _
-                   & " ;"
+        strQuery = "INSERT INTO dbo.DimSAPBOUser_Stg" _
+                 & "     ( SI_ID" _
+                 & "      ,SI_CUID" _
+                 & "      ,SI_NAME" _
+                 & "      ,SI_USERFULLNAME" _
+                 & "      ,SI_DESCRIPTION" _
+                 & "      ,SI_EMAIL_ADDRESS" _
+                 & "      ,SI_LASTLOGONTIME" _
+                 & "      ,Disabled" _
+                 & "     )" _
+                 & "VALUES" _
+                 & "     (" _
+                 & "          " + strID + "                  " _
+                 & "         ,'" + strCUID + "'              " _
+                 & "         ,'" + strName + "'              " _
+                 & "         ,'" + strFullName + "'             " _
+                 & "         ,'" + strDescription + "'        " _
+                 & "         ,'" + strEmailAddress + "'            " _
+                 & "         ,'" + strLastLogonTime + "'                " _
+                 & "         ," + strDisabled + "            " _
+                 & "     )"
 
         ExecuteQuery(strQuery)
 
     End Sub
 
-    Private Sub LoadObjectToDatabase(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
+    Private Sub LoadObjectToDatabaseStg(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
 
         Dim strQuery As String
 
@@ -638,11 +604,11 @@ Public Class frmTools
 
     Private Sub btnExtractRepo_Click(sender As Object, e As EventArgs) Handles btnExtractRepo.Click
 
-        GetBOObjectList(False, True, txtExtractRepoDatabaseName.Text.ToString(), txtExtractRepoSQLServer.Text.ToString())
+        GetBOObjectList(False, txtExtractRepoDatabaseName.Text.ToString(), txtExtractRepoSQLServer.Text.ToString())
 
     End Sub
 
-    Protected Sub GetBOObjectList(blnDisplay As Boolean, blnLoadDatabase As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+    Protected Sub GetBOObjectList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
 
         Me.NewBOSession()
 
@@ -654,7 +620,7 @@ Public Class frmTools
             SetSQLConnection(strDatabaseName, strSQLServerName)
 
             'Create stage table
-            CreateUserTableForRepo()
+            CreateObjectTableForRepo()
 
             Dim enumerator As IEnumerator
             Try
@@ -691,7 +657,7 @@ Public Class frmTools
                         Exit Try
                     End Try
 
-                    LoadObjectToDatabase(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
+                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
 
                 Loop
             Finally
