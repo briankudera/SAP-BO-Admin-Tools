@@ -76,13 +76,15 @@ Partial Class frmTools
         Me.btnExtractRepo = New System.Windows.Forms.Button()
         Me.tabAddDBCredentials = New System.Windows.Forms.TabPage()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.txtAddDBCredentialsPW = New System.Windows.Forms.TextBox()
+        Me.Label13 = New System.Windows.Forms.Label()
         Me.btnAddDBCredentialsForGroup = New System.Windows.Forms.Button()
         Me.txtGroupNameToProcess = New System.Windows.Forms.TextBox()
         Me.Label14 = New System.Windows.Forms.Label()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.txtAddDBCredentialsPW = New System.Windows.Forms.TextBox()
-        Me.Label13 = New System.Windows.Forms.Label()
+        Me.txtSIID = New System.Windows.Forms.TextBox()
+        Me.Label15 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -482,6 +484,8 @@ Partial Class frmTools
         '
         'tabExtractRepo
         '
+        Me.tabExtractRepo.Controls.Add(Me.txtSIID)
+        Me.tabExtractRepo.Controls.Add(Me.Label15)
         Me.tabExtractRepo.Controls.Add(Me.txtExtractRepoDatabaseName)
         Me.tabExtractRepo.Controls.Add(Me.Label11)
         Me.tabExtractRepo.Controls.Add(Me.txtExtractRepoSQLServer)
@@ -497,7 +501,7 @@ Partial Class frmTools
         '
         'txtExtractRepoDatabaseName
         '
-        Me.txtExtractRepoDatabaseName.Location = New System.Drawing.Point(107, 32)
+        Me.txtExtractRepoDatabaseName.Location = New System.Drawing.Point(106, 56)
         Me.txtExtractRepoDatabaseName.Name = "txtExtractRepoDatabaseName"
         Me.txtExtractRepoDatabaseName.Size = New System.Drawing.Size(220, 20)
         Me.txtExtractRepoDatabaseName.TabIndex = 14
@@ -505,7 +509,7 @@ Partial Class frmTools
         '
         'Label11
         '
-        Me.Label11.Location = New System.Drawing.Point(7, 30)
+        Me.Label11.Location = New System.Drawing.Point(3, 53)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(105, 23)
         Me.Label11.TabIndex = 13
@@ -514,7 +518,7 @@ Partial Class frmTools
         '
         'txtExtractRepoSQLServer
         '
-        Me.txtExtractRepoSQLServer.Location = New System.Drawing.Point(107, 6)
+        Me.txtExtractRepoSQLServer.Location = New System.Drawing.Point(106, 30)
         Me.txtExtractRepoSQLServer.Name = "txtExtractRepoSQLServer"
         Me.txtExtractRepoSQLServer.Size = New System.Drawing.Size(220, 20)
         Me.txtExtractRepoSQLServer.TabIndex = 12
@@ -522,7 +526,7 @@ Partial Class frmTools
         '
         'Label12
         '
-        Me.Label12.Location = New System.Drawing.Point(7, 4)
+        Me.Label12.Location = New System.Drawing.Point(3, 27)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(105, 23)
         Me.Label12.TabIndex = 11
@@ -561,6 +565,22 @@ Partial Class frmTools
         Me.GroupBox7.TabIndex = 2
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Enter Info"
+        '
+        'txtAddDBCredentialsPW
+        '
+        Me.txtAddDBCredentialsPW.Location = New System.Drawing.Point(76, 45)
+        Me.txtAddDBCredentialsPW.Name = "txtAddDBCredentialsPW"
+        Me.txtAddDBCredentialsPW.Size = New System.Drawing.Size(252, 20)
+        Me.txtAddDBCredentialsPW.TabIndex = 13
+        '
+        'Label13
+        '
+        Me.Label13.Location = New System.Drawing.Point(8, 43)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(105, 23)
+        Me.Label13.TabIndex = 12
+        Me.Label13.Text = "&Password:"
+        Me.Label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'btnAddDBCredentialsForGroup
         '
@@ -604,21 +624,21 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
-        'txtAddDBCredentialsPW
+        'txtSIID
         '
-        Me.txtAddDBCredentialsPW.Location = New System.Drawing.Point(76, 45)
-        Me.txtAddDBCredentialsPW.Name = "txtAddDBCredentialsPW"
-        Me.txtAddDBCredentialsPW.Size = New System.Drawing.Size(252, 20)
-        Me.txtAddDBCredentialsPW.TabIndex = 13
+        Me.txtSIID.Location = New System.Drawing.Point(106, 7)
+        Me.txtSIID.Name = "txtSIID"
+        Me.txtSIID.Size = New System.Drawing.Size(220, 20)
+        Me.txtSIID.TabIndex = 16
         '
-        'Label13
+        'Label15
         '
-        Me.Label13.Location = New System.Drawing.Point(8, 43)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(105, 23)
-        Me.Label13.TabIndex = 12
-        Me.Label13.Text = "&Password:"
-        Me.Label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.Label15.Location = New System.Drawing.Point(3, 4)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(105, 23)
+        Me.Label15.TabIndex = 15
+        Me.Label15.Text = "SI_ID:"
+        Me.Label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'frmTools
         '
@@ -722,4 +742,6 @@ Partial Class frmTools
     Friend WithEvents Label14 As Label
     Friend WithEvents txtAddDBCredentialsPW As TextBox
     Friend WithEvents Label13 As Label
+    Friend WithEvents txtSIID As TextBox
+    Friend WithEvents Label15 As Label
 End Class
