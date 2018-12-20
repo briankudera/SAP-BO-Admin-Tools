@@ -1,7 +1,10 @@
 ﻿Imports CrystalDecisions.Enterprise
 Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
-Imports CrystalDecisions.Enterprise.SecurityInfo
+Imports NLog
+Imports NLog.Targets
+Imports NLog.Config
+
 
 Public Class frmTools
 
@@ -29,20 +32,54 @@ Public Class frmTools
     Private cmdTargetDB As String = ""
     Private cmdCommandLine As String = ""
 
+    Dim logger As Logger = LogManager.GetLogger("Example")
+
     Private Sub Tools_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        ConfigureLogger()
 
         Dim arguments As String() = Environment.GetCommandLineArgs()
 
-        If arguments.Count > 1 Then
-            ConsoleMain(arguments)
-        End If
+            If arguments.Count > 1 Then
+                ConsoleMain(arguments)
+            End If
 
-        If cboCMSServer.Items.Count > 0 Then
-            cboCMSServer.SelectedIndex = 0    ' The first item has index 0 '
-        End If
-        If cboCMSAuthentication.Items.Count > 0 Then
-            cboCMSAuthentication.SelectedIndex = 0    ' The first item has index 0 '
-        End If
+            If cboCMSServer.Items.Count > 0 Then
+                cboCMSServer.SelectedIndex = 0    ' The first item has index 0 '
+            End If
+            If cboCMSAuthentication.Items.Count > 0 Then
+                cboCMSAuthentication.SelectedIndex = 0    ' The first item has index 0 '
+            End If
+
+    End Sub
+
+    Private Sub ConfigureLogger()
+
+        Dim config = New LoggingConfiguration()
+        Dim consoleTarget = New ColoredConsoleTarget("target1") With {
+            .Layout = "${date:format=HH\:mm\:ss} ${level} ${message} ${exception}"
+        }
+
+        config.AddTarget(consoleTarget)
+
+        Dim fileTarget = New FileTarget("target2") With {
+            .FileName = "${basedir}/SAPBOAdminToolsLog.txt",
+            .Layout = "${longdate} ${level} ${message}  ${exception}"
+        }
+        config.AddTarget(fileTarget)
+
+        config.AddRuleForOneLevel(LogLevel.[Error], fileTarget)
+        config.AddRuleForAllLevels(consoleTarget)
+
+        LogManager.Configuration = config
+
+        'Example logger calls
+        'logger.Trace("trace log message")
+        'logger.Debug("debug log message")
+        'logger.Info("info log message")
+        'logger.Warn("warn log message")
+        'logger.[Error]("error log message")
+        'logger.Fatal("fatal log message")
 
     End Sub
 
@@ -93,8 +130,21 @@ Public Class frmTools
         Me.rtbOutput.AppendText("Opening session to SAP BO." & ChrW(13) & ChrW(10))
         Me.rtbOutput.AppendText(ChrW(13) & ChrW(10))
         Me.rtbOutput.AppendText(ChrW(13) & ChrW(10))
-        Me.boEnterpriseSession = mgr.Logon(strUserName, strPassword, strCMSName, strAuthentication)
-        Me.boInfoStore = New InfoStore(Me.boEnterpriseSession.GetService("InfoStore"))
+
+        Try
+            Me.boEnterpriseSession = mgr.Logon(strUserName, strPassword, strCMSName, strAuthentication)
+        Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error while establishing a BO Enterprise Session")
+            Application.Exit()
+        End Try
+
+        Try
+            Me.boInfoStore = New InfoStore(Me.boEnterpriseSession.GetService("InfoStore"))
+        Catch ex As Exception
+
+            logger.[Error](ex, "ow noos! Error while establishing a new InfoStore")
+            Application.Exit()
+        End Try
 
     End Sub
 
@@ -378,7 +428,10 @@ Public Class frmTools
                         Me.rtbOutput.AppendText(String.Concat(arrResults))
                     End If
 
-                    LoadUserToDatabaseStg(strUserId, strCUID, strName, strFullName, strDescription, strEmailAddress, strLastLogonTime, strDisabled)
+                    'If we've received db info, load it, else skip
+                    If strDatabaseName <> "" Then
+                        LoadUserToDatabaseStg(strUserId, strCUID, strName, strFullName, strDescription, strEmailAddress, strLastLogonTime, strDisabled)
+                    End If
 
                 Loop
             Finally
@@ -594,9 +647,14 @@ Public Class frmTools
 
         Dim cmdSQLCmd As New SqlCommand(strQuery, conSQLConn)
 
-        conSQLConn.Open()
+        Try
+            conSQLConn.Open()
 
-        cmdSQLCmd.ExecuteNonQuery()
+            cmdSQLCmd.ExecuteNonQuery()
+
+        Catch ex As Exception
+            Exit Try
+        End Try
 
         conSQLConn.Close()
 
