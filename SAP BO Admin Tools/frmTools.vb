@@ -252,6 +252,7 @@ Public Class frmTools
                     End If
 
                     objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                    objCurrentObject.Properties.Item("SI_UPDATE_TS").Value = Date.Now
 
                     Dim txtOutput As String() = New String() {"Object updated: (", strObjectName, ") ", strObjectName, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
@@ -313,6 +314,7 @@ Public Class frmTools
                             End If
 
                             objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                            objCurrentObject.Properties.Item("SI_UPDATE_TS").Value = Date.Now
 
                             Dim txtOutput As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
                             Me.rtbOutput.AppendText(String.Concat(txtOutput))
