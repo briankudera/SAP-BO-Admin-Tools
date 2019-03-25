@@ -551,6 +551,7 @@ Public Class frmTools
                         & "   ,SI_OWNER varchar(255) null" _
                         & "   ,SI_PARENT_FOLDER int null" _
                         & "   ,SI_INSTANCE bit null default 0" _
+                        & "   ,SI_SCHEDULE_STATUS tinyint not null default -1" _
                         & "   ,SI_SIZE int null" _
                         & "   ,SI_PARENTID int null" _
                         & "   ,SI_UPDATE_TS datetime null" _
@@ -597,7 +598,7 @@ Public Class frmTools
 
     End Sub
 
-    Private Sub LoadObjectToDatabaseStg(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
+    Private Sub LoadObjectToDatabaseStg(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intScheduleStatus As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
 
         Dim strQuery As String
 
@@ -608,6 +609,7 @@ Public Class frmTools
                  & "      ,SI_OWNER" _
                  & "      ,SI_PARENT_FOLDER" _
                  & "      ,SI_INSTANCE" _
+                 & "      ,SI_SCHEDULE_STATUS" _
                  & "      ,SI_SIZE" _
                  & "      ,SI_PARENTID" _
                  & "      ,SI_UPDATE_TS" _
@@ -624,6 +626,7 @@ Public Class frmTools
                  & "         ,'" + strOwner + "'             " _
                  & "         ," + intParentFolder + "        " _
                  & "         ," + blnInstance + "            " _
+                 & "         ," + intScheduleStatus + "      " _
                  & "         ," + intSize + "                " _
                  & "         ," + intParentId + "            " _
                  & "         ,'" + dteUpdateTimestamp + "'   " _
@@ -675,9 +678,9 @@ Public Class frmTools
         Dim strQuery As String
         Dim strSIID As String = Me.txtSIID.Text.ToString()
         If strSIID <> "" Then
-            strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
+            strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
         Else
-            strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
+            strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
         End If
 
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
@@ -700,6 +703,7 @@ Public Class frmTools
                     Dim strOwner As String = current.Properties.Item("SI_OWNER").Value.ToString()
                     Dim intParentFolder As String = current.Properties.Item("SI_PARENT_FOLDER").Value.ToString()
                     Dim blnInstance As String = If(current.Properties.Item("SI_INSTANCE").Value.ToString() = "False", "0", "1")
+
                     Dim intParentId As String = current.Properties.Item("SI_PARENTID").Value.ToString()
                     Dim dteUpdateTimestamp As String = current.Properties.Item("SI_UPDATE_TS").Value.ToString()
                     Dim dteCreationTimestamp As String = current.Properties.Item("SI_CREATION_TIME").Value.ToString()
@@ -724,7 +728,17 @@ Public Class frmTools
                         Exit Try
                     End Try
 
-                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
+                    'This property may not exist
+                    Dim intScheduleStatus As String
+                    Try
+                        intScheduleStatus = current.Properties.Item("SI_SCHEDULE_STATUS").Value.ToString()
+                    Catch ex As Exception
+                        intScheduleStatus = -1
+                        Exit Try
+                    End Try
+
+
+                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intScheduleStatus, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
 
                 Loop
             Finally
