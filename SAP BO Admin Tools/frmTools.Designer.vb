@@ -62,13 +62,9 @@ Partial Class frmTools
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.btnGetListOfUsers = New System.Windows.Forms.Button()
         Me.tabLoadListOfUsersToDB = New System.Windows.Forms.TabPage()
-        Me.GroupBox6 = New System.Windows.Forms.GroupBox()
-        Me.btnLoadListOfUsersToDB = New System.Windows.Forms.Button()
-        Me.txtLoadListOfUsersToDBDatabaseName = New System.Windows.Forms.TextBox()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
-        Me.Label10 = New System.Windows.Forms.Label()
         Me.tabExtractRepo = New System.Windows.Forms.TabPage()
+        Me.txtSIID = New System.Windows.Forms.TextBox()
+        Me.Label15 = New System.Windows.Forms.Label()
         Me.txtExtractRepoDatabaseName = New System.Windows.Forms.TextBox()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.txtExtractRepoSQLServer = New System.Windows.Forms.TextBox()
@@ -83,8 +79,13 @@ Partial Class frmTools
         Me.Label14 = New System.Windows.Forms.Label()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.txtSIID = New System.Windows.Forms.TextBox()
-        Me.Label15 = New System.Windows.Forms.Label()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.txtLoadListOfUsersToDBDatabaseName = New System.Windows.Forms.TextBox()
+        Me.btnLoadListOfUsersToDB = New System.Windows.Forms.Button()
+        Me.txtSIUserId = New System.Windows.Forms.TextBox()
+        Me.Label16 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -96,7 +97,6 @@ Partial Class frmTools
         Me.tabGetListOfUsers.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
         Me.tabLoadListOfUsersToDB.SuspendLayout()
-        Me.GroupBox6.SuspendLayout()
         Me.tabExtractRepo.SuspendLayout()
         Me.tabAddDBCredentials.SuspendLayout()
         Me.GroupBox7.SuspendLayout()
@@ -416,7 +416,13 @@ Partial Class frmTools
         '
         'tabLoadListOfUsersToDB
         '
-        Me.tabLoadListOfUsersToDB.Controls.Add(Me.GroupBox6)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.txtSIUserId)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.Label16)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.txtLoadListOfUsersToDBDatabaseName)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.Label9)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.btnLoadListOfUsersToDB)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.txtLoadListOfUsersToDBSQLServerName)
+        Me.tabLoadListOfUsersToDB.Controls.Add(Me.Label10)
         Me.tabLoadListOfUsersToDB.Location = New System.Drawing.Point(4, 22)
         Me.tabLoadListOfUsersToDB.Name = "tabLoadListOfUsersToDB"
         Me.tabLoadListOfUsersToDB.Padding = New System.Windows.Forms.Padding(3)
@@ -424,63 +430,6 @@ Partial Class frmTools
         Me.tabLoadListOfUsersToDB.TabIndex = 4
         Me.tabLoadListOfUsersToDB.Text = "Load List of Users to DB"
         Me.tabLoadListOfUsersToDB.UseVisualStyleBackColor = True
-        '
-        'GroupBox6
-        '
-        Me.GroupBox6.Controls.Add(Me.btnLoadListOfUsersToDB)
-        Me.GroupBox6.Controls.Add(Me.txtLoadListOfUsersToDBDatabaseName)
-        Me.GroupBox6.Controls.Add(Me.Label9)
-        Me.GroupBox6.Controls.Add(Me.txtLoadListOfUsersToDBSQLServerName)
-        Me.GroupBox6.Controls.Add(Me.Label10)
-        Me.GroupBox6.Location = New System.Drawing.Point(7, 7)
-        Me.GroupBox6.Name = "GroupBox6"
-        Me.GroupBox6.Size = New System.Drawing.Size(537, 79)
-        Me.GroupBox6.TabIndex = 2
-        Me.GroupBox6.TabStop = False
-        Me.GroupBox6.Text = "Enter Info"
-        '
-        'btnLoadListOfUsersToDB
-        '
-        Me.btnLoadListOfUsersToDB.Location = New System.Drawing.Point(347, 19)
-        Me.btnLoadListOfUsersToDB.Name = "btnLoadListOfUsersToDB"
-        Me.btnLoadListOfUsersToDB.Size = New System.Drawing.Size(97, 46)
-        Me.btnLoadListOfUsersToDB.TabIndex = 11
-        Me.btnLoadListOfUsersToDB.Text = "Load List of Users to DB"
-        Me.btnLoadListOfUsersToDB.UseVisualStyleBackColor = True
-        '
-        'txtLoadListOfUsersToDBDatabaseName
-        '
-        Me.txtLoadListOfUsersToDBDatabaseName.Location = New System.Drawing.Point(108, 45)
-        Me.txtLoadListOfUsersToDBDatabaseName.Name = "txtLoadListOfUsersToDBDatabaseName"
-        Me.txtLoadListOfUsersToDBDatabaseName.Size = New System.Drawing.Size(220, 20)
-        Me.txtLoadListOfUsersToDBDatabaseName.TabIndex = 10
-        Me.txtLoadListOfUsersToDBDatabaseName.Text = "BI_Configuration"
-        '
-        'Label9
-        '
-        Me.Label9.Location = New System.Drawing.Point(8, 43)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(105, 23)
-        Me.Label9.TabIndex = 9
-        Me.Label9.Text = "&Database Name:"
-        Me.Label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'txtLoadListOfUsersToDBSQLServerName
-        '
-        Me.txtLoadListOfUsersToDBSQLServerName.Location = New System.Drawing.Point(108, 19)
-        Me.txtLoadListOfUsersToDBSQLServerName.Name = "txtLoadListOfUsersToDBSQLServerName"
-        Me.txtLoadListOfUsersToDBSQLServerName.Size = New System.Drawing.Size(220, 20)
-        Me.txtLoadListOfUsersToDBSQLServerName.TabIndex = 8
-        Me.txtLoadListOfUsersToDBSQLServerName.Text = "SQLAG02"
-        '
-        'Label10
-        '
-        Me.Label10.Location = New System.Drawing.Point(8, 17)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(105, 23)
-        Me.Label10.TabIndex = 7
-        Me.Label10.Text = "&SQL Server:"
-        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'tabExtractRepo
         '
@@ -498,6 +447,22 @@ Partial Class frmTools
         Me.tabExtractRepo.TabIndex = 5
         Me.tabExtractRepo.Text = "Extract Repo"
         Me.tabExtractRepo.UseVisualStyleBackColor = True
+        '
+        'txtSIID
+        '
+        Me.txtSIID.Location = New System.Drawing.Point(106, 7)
+        Me.txtSIID.Name = "txtSIID"
+        Me.txtSIID.Size = New System.Drawing.Size(220, 20)
+        Me.txtSIID.TabIndex = 16
+        '
+        'Label15
+        '
+        Me.Label15.Location = New System.Drawing.Point(3, 4)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(105, 23)
+        Me.Label15.TabIndex = 15
+        Me.Label15.Text = "SI_ID:"
+        Me.Label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'txtExtractRepoDatabaseName
         '
@@ -624,21 +589,64 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
-        'txtSIID
+        'Label10
         '
-        Me.txtSIID.Location = New System.Drawing.Point(106, 7)
-        Me.txtSIID.Name = "txtSIID"
-        Me.txtSIID.Size = New System.Drawing.Size(220, 20)
-        Me.txtSIID.TabIndex = 16
+        Me.Label10.Location = New System.Drawing.Point(4, 36)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(105, 23)
+        Me.Label10.TabIndex = 7
+        Me.Label10.Text = "&SQL Server:"
+        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
-        'Label15
+        'txtLoadListOfUsersToDBSQLServerName
         '
-        Me.Label15.Location = New System.Drawing.Point(3, 4)
-        Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(105, 23)
-        Me.Label15.TabIndex = 15
-        Me.Label15.Text = "SI_ID:"
-        Me.Label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.txtLoadListOfUsersToDBSQLServerName.Location = New System.Drawing.Point(104, 38)
+        Me.txtLoadListOfUsersToDBSQLServerName.Name = "txtLoadListOfUsersToDBSQLServerName"
+        Me.txtLoadListOfUsersToDBSQLServerName.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadListOfUsersToDBSQLServerName.TabIndex = 8
+        Me.txtLoadListOfUsersToDBSQLServerName.Text = "SQLAG02"
+        '
+        'Label9
+        '
+        Me.Label9.Location = New System.Drawing.Point(4, 62)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(105, 23)
+        Me.Label9.TabIndex = 9
+        Me.Label9.Text = "&Database Name:"
+        Me.Label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtLoadListOfUsersToDBDatabaseName
+        '
+        Me.txtLoadListOfUsersToDBDatabaseName.Location = New System.Drawing.Point(104, 64)
+        Me.txtLoadListOfUsersToDBDatabaseName.Name = "txtLoadListOfUsersToDBDatabaseName"
+        Me.txtLoadListOfUsersToDBDatabaseName.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadListOfUsersToDBDatabaseName.TabIndex = 10
+        Me.txtLoadListOfUsersToDBDatabaseName.Text = "BI_Configuration"
+        '
+        'btnLoadListOfUsersToDB
+        '
+        Me.btnLoadListOfUsersToDB.Location = New System.Drawing.Point(375, 24)
+        Me.btnLoadListOfUsersToDB.Name = "btnLoadListOfUsersToDB"
+        Me.btnLoadListOfUsersToDB.Size = New System.Drawing.Size(97, 46)
+        Me.btnLoadListOfUsersToDB.TabIndex = 11
+        Me.btnLoadListOfUsersToDB.Text = "Load List of Users to DB"
+        Me.btnLoadListOfUsersToDB.UseVisualStyleBackColor = True
+        '
+        'txtSIUserId
+        '
+        Me.txtSIUserId.Location = New System.Drawing.Point(104, 13)
+        Me.txtSIUserId.Name = "txtSIUserId"
+        Me.txtSIUserId.Size = New System.Drawing.Size(220, 20)
+        Me.txtSIUserId.TabIndex = 18
+        '
+        'Label16
+        '
+        Me.Label16.Location = New System.Drawing.Point(1, 10)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(105, 23)
+        Me.Label16.TabIndex = 17
+        Me.Label16.Text = "SI_ID:"
+        Me.Label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'frmTools
         '
@@ -679,8 +687,7 @@ Partial Class frmTools
         Me.tabGetListOfUsers.ResumeLayout(False)
         Me.GroupBox5.ResumeLayout(False)
         Me.tabLoadListOfUsersToDB.ResumeLayout(False)
-        Me.GroupBox6.ResumeLayout(False)
-        Me.GroupBox6.PerformLayout()
+        Me.tabLoadListOfUsersToDB.PerformLayout()
         Me.tabExtractRepo.ResumeLayout(False)
         Me.tabExtractRepo.PerformLayout()
         Me.tabAddDBCredentials.ResumeLayout(False)
@@ -723,12 +730,6 @@ Partial Class frmTools
     Friend WithEvents GroupBox5 As GroupBox
     Friend WithEvents btnGetListOfUsers As Button
     Friend WithEvents tabLoadListOfUsersToDB As TabPage
-    Friend WithEvents GroupBox6 As GroupBox
-    Friend WithEvents btnLoadListOfUsersToDB As Button
-    Friend WithEvents txtLoadListOfUsersToDBDatabaseName As TextBox
-    Friend WithEvents Label9 As Label
-    Friend WithEvents txtLoadListOfUsersToDBSQLServerName As TextBox
-    Friend WithEvents Label10 As Label
     Friend WithEvents tabExtractRepo As TabPage
     Friend WithEvents txtExtractRepoDatabaseName As TextBox
     Friend WithEvents Label11 As Label
@@ -744,4 +745,11 @@ Partial Class frmTools
     Friend WithEvents Label13 As Label
     Friend WithEvents txtSIID As TextBox
     Friend WithEvents Label15 As Label
+    Friend WithEvents txtSIUserId As TextBox
+    Friend WithEvents Label16 As Label
+    Friend WithEvents txtLoadListOfUsersToDBDatabaseName As TextBox
+    Friend WithEvents Label9 As Label
+    Friend WithEvents btnLoadListOfUsersToDB As Button
+    Friend WithEvents txtLoadListOfUsersToDBSQLServerName As TextBox
+    Friend WithEvents Label10 As Label
 End Class

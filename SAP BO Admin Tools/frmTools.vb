@@ -384,16 +384,29 @@ Public Class frmTools
 
     Private Sub btnLoadListOfUsersToDB_Click(sender As Object, e As EventArgs) Handles btnLoadListOfUsersToDB.Click
 
-        GetBOUserList(False, Me.txtLoadListOfUsersToDBDatabaseName.Text.ToString(), Me.txtLoadListOfUsersToDBSQLServerName.Text.ToString())
+        GetBOUserList(False, Me.txtLoadListOfUsersToDBDatabaseName.Text.ToString(), Me.txtLoadListOfUsersToDBSQLServerName.Text.ToString(), Me.txtSIUserId.Text.ToString())
 
     End Sub
 
-    Protected Sub GetBOUserList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+    Protected Sub GetBOUserList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "", Optional strSIID As String = "")
+
+        Dim strQuery As String
 
         Me.NewBOSession()
 
-        Dim strQuery As String = ("Select SI_ID, SI_CUID, SI_NAME, SI_USERFULLNAME, SI_DESCRIPTION, SI_EMAIL_ADDRESS, SI_LASTLOGONTIME FROM CI_SYSTEMOBJECTS Where SI_KIND='User' ORDER BY SI_ID")
+        If strSIID <> "" Then
+            strQuery = ("Select TOP 10000 * FROM CI_SYSTEMOBJECTS Where SI_KIND='User' AND SI_ID = " + strSIID + " ORDER BY SI_ID")
+        Else
+            strQuery = ("Select TOP 10000 * FROM CI_SYSTEMOBJECTS Where SI_KIND='User' ORDER BY SI_ID")
+        End If
+
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
+
+
+        If blnDisplay Then
+            Dim arrResults As String() = New String() {"Count of users found: (", objects.Count.ToString(), ChrW(13) & ChrW(10)}
+            Me.rtbOutput.AppendText(String.Concat(arrResults))
+        End If
 
         If (objects.Count > 0) Then
 
@@ -402,17 +415,29 @@ Public Class frmTools
             'Create stage table
             CreateUserTableForRepo()
 
+            Dim strUserId As String = ""
+            Dim strCUID As String = ""
+            Dim strName As String = ""
+            Dim strFullName As String = ""
+            Dim strDescription As String = ""
+            Dim strEmailAddress = ""
+
             Dim enumerator As IEnumerator
             Try
                 enumerator = objects.GetEnumerator
                 Do While enumerator.MoveNext
                     Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                    Dim strUserId As String = current.Properties.Item("SI_ID").Value.ToString()
-                    Dim strCUID As String = current.Properties.Item("SI_CUID").Value.ToString()
-                    Dim strName As String = current.Properties.Item("SI_NAME").Value.ToString()
-                    Dim strFullName As String = current.Properties.Item("SI_USERFULLNAME").Value.ToString()
-                    Dim strDescription As String = current.Properties.Item("SI_DESCRIPTION").Value.ToString()
-                    Dim strEmailAddress As String = current.Properties.Item("SI_EMAIL_ADDRESS").Value.ToString()
+
+                    Try
+                        strUserId = current.Properties.Item("SI_ID").Value.ToString()
+                        strCUID = current.Properties.Item("SI_CUID").Value.ToString()
+                        strName = current.Properties.Item("SI_NAME").Value.ToString()
+                        strFullName = current.Properties.Item("SI_USERFULLNAME").Value.ToString()
+                        strDescription = current.Properties.Item("SI_DESCRIPTION").Value.ToString()
+                        strEmailAddress = current.Properties.Item("SI_EMAIL_ADDRESS").Value.ToString()
+                    Catch ex As Exception
+                        logger.[Error](ex, "ow noos! Error in GetBOUserList")
+                    End Try
 
                     'This property may not exist if the user has never logged on
                     Dim strLastLogonTime As String
@@ -436,6 +461,9 @@ Public Class frmTools
                     End If
 
                 Loop
+            Catch ex As Exception
+
+                logger.[Error](ex, "ow noos! Error in GetBOUserList")
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
@@ -586,9 +614,9 @@ Public Class frmTools
                  & "     (" _
                  & "          " + strID + "                  " _
                  & "         ,'" + strCUID + "'              " _
-                 & "         ,'" + strName + "'              " _
-                 & "         ,'" + strFullName + "'             " _
-                 & "         ,'" + strDescription + "'        " _
+                 & "         ,'" + Replace(strName, "'", "''") + "'              " _
+                 & "         ,'" + Replace(strFullName, "'", "''") + "'             " _
+                 & "         ,'" + Replace(strDescription, "'", "''") + "'        " _
                  & "         ,'" + strEmailAddress + "'            " _
                  & "         ,'" + strLastLogonTime + "'                " _
                  & "         ," + strDisabled + "            " _
@@ -622,8 +650,8 @@ Public Class frmTools
                  & "     (" _
                  & "          " + strId + "                  " _
                  & "         ,'" + strCUID + "'              " _
-                 & "         ,'" + strName + "'              " _
-                 & "         ,'" + strOwner + "'             " _
+                 & "         ,'" + Replace(strName, "'", "''") + "'              " _
+                 & "         ,'" + Replace(strOwner, "'", "''") + "'             " _
                  & "         ," + intParentFolder + "        " _
                  & "         ," + blnInstance + "            " _
                  & "         ," + intScheduleStatus + "      " _
