@@ -729,7 +729,7 @@ Public Class frmTools
                     Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
                     Dim strId As String = current.Properties.Item("SI_ID").Value.ToString()
                     Dim strCUID As String = current.Properties.Item("SI_CUID").Value.ToString()
-                    Dim strName As String = Replace(current.Properties.Item("SI_NAME").Value.ToString(), "'", "''")
+                    Dim strName As String = current.Properties.Item("SI_NAME").Value.ToString()
                     Dim strOwner As String = current.Properties.Item("SI_OWNER").Value.ToString()
                     Dim intParentFolder As String = current.Properties.Item("SI_PARENT_FOLDER").Value.ToString()
                     Dim blnInstance As String = If(current.Properties.Item("SI_INSTANCE").Value.ToString() = "False", "0", "1")
