@@ -271,6 +271,8 @@ Public Class frmTools
     End Sub
 
 
+
+
     Private Sub btnReplaceOwnerOnSingeDoc_Click(sender As Object, e As EventArgs) Handles btnReplaceOwnerOnSingeDoc.Click
 
         Dim intDocId As Integer
@@ -828,5 +830,8 @@ Public Class frmTools
 
         Me.LogoffBOSession()
 
+    End Sub
+
+    Private Sub btnResetAdminPW_Click(sender As Object, e As EventArgs) Handles btnResetAdminPW.Click
     End Sub
 End Class

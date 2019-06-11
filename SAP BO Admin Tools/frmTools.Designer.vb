@@ -62,6 +62,13 @@ Partial Class frmTools
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.btnGetListOfUsers = New System.Windows.Forms.Button()
         Me.tabLoadListOfUsersToDB = New System.Windows.Forms.TabPage()
+        Me.txtSIUserId = New System.Windows.Forms.TextBox()
+        Me.Label16 = New System.Windows.Forms.Label()
+        Me.txtLoadListOfUsersToDBDatabaseName = New System.Windows.Forms.TextBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.btnLoadListOfUsersToDB = New System.Windows.Forms.Button()
+        Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
+        Me.Label10 = New System.Windows.Forms.Label()
         Me.tabExtractRepo = New System.Windows.Forms.TabPage()
         Me.txtSIID = New System.Windows.Forms.TextBox()
         Me.Label15 = New System.Windows.Forms.Label()
@@ -77,15 +84,10 @@ Partial Class frmTools
         Me.btnAddDBCredentialsForGroup = New System.Windows.Forms.Button()
         Me.txtGroupNameToProcess = New System.Windows.Forms.TextBox()
         Me.Label14 = New System.Windows.Forms.Label()
+        Me.tabResetAdminPW = New System.Windows.Forms.TabPage()
+        Me.btnResetAdminPW = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.txtLoadListOfUsersToDBSQLServerName = New System.Windows.Forms.TextBox()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.txtLoadListOfUsersToDBDatabaseName = New System.Windows.Forms.TextBox()
-        Me.btnLoadListOfUsersToDB = New System.Windows.Forms.Button()
-        Me.txtSIUserId = New System.Windows.Forms.TextBox()
-        Me.Label16 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -100,6 +102,7 @@ Partial Class frmTools
         Me.tabExtractRepo.SuspendLayout()
         Me.tabAddDBCredentials.SuspendLayout()
         Me.GroupBox7.SuspendLayout()
+        Me.tabResetAdminPW.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -200,6 +203,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabLoadListOfUsersToDB)
         Me.tabFunctions.Controls.Add(Me.tabExtractRepo)
         Me.tabFunctions.Controls.Add(Me.tabAddDBCredentials)
+        Me.tabFunctions.Controls.Add(Me.tabResetAdminPW)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -431,6 +435,65 @@ Partial Class frmTools
         Me.tabLoadListOfUsersToDB.Text = "Load List of Users to DB"
         Me.tabLoadListOfUsersToDB.UseVisualStyleBackColor = True
         '
+        'txtSIUserId
+        '
+        Me.txtSIUserId.Location = New System.Drawing.Point(104, 13)
+        Me.txtSIUserId.Name = "txtSIUserId"
+        Me.txtSIUserId.Size = New System.Drawing.Size(220, 20)
+        Me.txtSIUserId.TabIndex = 18
+        '
+        'Label16
+        '
+        Me.Label16.Location = New System.Drawing.Point(1, 10)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(105, 23)
+        Me.Label16.TabIndex = 17
+        Me.Label16.Text = "SI_ID:"
+        Me.Label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtLoadListOfUsersToDBDatabaseName
+        '
+        Me.txtLoadListOfUsersToDBDatabaseName.Location = New System.Drawing.Point(104, 64)
+        Me.txtLoadListOfUsersToDBDatabaseName.Name = "txtLoadListOfUsersToDBDatabaseName"
+        Me.txtLoadListOfUsersToDBDatabaseName.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadListOfUsersToDBDatabaseName.TabIndex = 10
+        Me.txtLoadListOfUsersToDBDatabaseName.Text = "BI_Configuration"
+        '
+        'Label9
+        '
+        Me.Label9.Location = New System.Drawing.Point(4, 62)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(105, 23)
+        Me.Label9.TabIndex = 9
+        Me.Label9.Text = "&Database Name:"
+        Me.Label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'btnLoadListOfUsersToDB
+        '
+        Me.btnLoadListOfUsersToDB.Location = New System.Drawing.Point(375, 24)
+        Me.btnLoadListOfUsersToDB.Name = "btnLoadListOfUsersToDB"
+        Me.btnLoadListOfUsersToDB.Size = New System.Drawing.Size(97, 46)
+        Me.btnLoadListOfUsersToDB.TabIndex = 11
+        Me.btnLoadListOfUsersToDB.Text = "Load List of Users to DB"
+        Me.btnLoadListOfUsersToDB.UseVisualStyleBackColor = True
+        '
+        'txtLoadListOfUsersToDBSQLServerName
+        '
+        Me.txtLoadListOfUsersToDBSQLServerName.Location = New System.Drawing.Point(104, 38)
+        Me.txtLoadListOfUsersToDBSQLServerName.Name = "txtLoadListOfUsersToDBSQLServerName"
+        Me.txtLoadListOfUsersToDBSQLServerName.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadListOfUsersToDBSQLServerName.TabIndex = 8
+        Me.txtLoadListOfUsersToDBSQLServerName.Text = "SQLAG02"
+        '
+        'Label10
+        '
+        Me.Label10.Location = New System.Drawing.Point(4, 36)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(105, 23)
+        Me.Label10.TabIndex = 7
+        Me.Label10.Text = "&SQL Server:"
+        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
         'tabExtractRepo
         '
         Me.tabExtractRepo.Controls.Add(Me.txtSIID)
@@ -572,6 +635,25 @@ Partial Class frmTools
         Me.Label14.Text = "&Group Name:"
         Me.Label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
+        'tabResetAdminPW
+        '
+        Me.tabResetAdminPW.Controls.Add(Me.btnResetAdminPW)
+        Me.tabResetAdminPW.Location = New System.Drawing.Point(4, 22)
+        Me.tabResetAdminPW.Name = "tabResetAdminPW"
+        Me.tabResetAdminPW.Size = New System.Drawing.Size(550, 92)
+        Me.tabResetAdminPW.TabIndex = 7
+        Me.tabResetAdminPW.Text = "Reset Admin PW"
+        Me.tabResetAdminPW.UseVisualStyleBackColor = True
+        '
+        'btnResetAdminPW
+        '
+        Me.btnResetAdminPW.Location = New System.Drawing.Point(234, 27)
+        Me.btnResetAdminPW.Name = "btnResetAdminPW"
+        Me.btnResetAdminPW.Size = New System.Drawing.Size(75, 40)
+        Me.btnResetAdminPW.TabIndex = 0
+        Me.btnResetAdminPW.Text = "Reset Admin PW"
+        Me.btnResetAdminPW.UseVisualStyleBackColor = True
+        '
         'rtbOutput
         '
         Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
@@ -588,65 +670,6 @@ Partial Class frmTools
         Me.Label8.Size = New System.Drawing.Size(39, 13)
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
-        '
-        'Label10
-        '
-        Me.Label10.Location = New System.Drawing.Point(4, 36)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(105, 23)
-        Me.Label10.TabIndex = 7
-        Me.Label10.Text = "&SQL Server:"
-        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'txtLoadListOfUsersToDBSQLServerName
-        '
-        Me.txtLoadListOfUsersToDBSQLServerName.Location = New System.Drawing.Point(104, 38)
-        Me.txtLoadListOfUsersToDBSQLServerName.Name = "txtLoadListOfUsersToDBSQLServerName"
-        Me.txtLoadListOfUsersToDBSQLServerName.Size = New System.Drawing.Size(220, 20)
-        Me.txtLoadListOfUsersToDBSQLServerName.TabIndex = 8
-        Me.txtLoadListOfUsersToDBSQLServerName.Text = "SQLAG02"
-        '
-        'Label9
-        '
-        Me.Label9.Location = New System.Drawing.Point(4, 62)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(105, 23)
-        Me.Label9.TabIndex = 9
-        Me.Label9.Text = "&Database Name:"
-        Me.Label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'txtLoadListOfUsersToDBDatabaseName
-        '
-        Me.txtLoadListOfUsersToDBDatabaseName.Location = New System.Drawing.Point(104, 64)
-        Me.txtLoadListOfUsersToDBDatabaseName.Name = "txtLoadListOfUsersToDBDatabaseName"
-        Me.txtLoadListOfUsersToDBDatabaseName.Size = New System.Drawing.Size(220, 20)
-        Me.txtLoadListOfUsersToDBDatabaseName.TabIndex = 10
-        Me.txtLoadListOfUsersToDBDatabaseName.Text = "BI_Configuration"
-        '
-        'btnLoadListOfUsersToDB
-        '
-        Me.btnLoadListOfUsersToDB.Location = New System.Drawing.Point(375, 24)
-        Me.btnLoadListOfUsersToDB.Name = "btnLoadListOfUsersToDB"
-        Me.btnLoadListOfUsersToDB.Size = New System.Drawing.Size(97, 46)
-        Me.btnLoadListOfUsersToDB.TabIndex = 11
-        Me.btnLoadListOfUsersToDB.Text = "Load List of Users to DB"
-        Me.btnLoadListOfUsersToDB.UseVisualStyleBackColor = True
-        '
-        'txtSIUserId
-        '
-        Me.txtSIUserId.Location = New System.Drawing.Point(104, 13)
-        Me.txtSIUserId.Name = "txtSIUserId"
-        Me.txtSIUserId.Size = New System.Drawing.Size(220, 20)
-        Me.txtSIUserId.TabIndex = 18
-        '
-        'Label16
-        '
-        Me.Label16.Location = New System.Drawing.Point(1, 10)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(105, 23)
-        Me.Label16.TabIndex = 17
-        Me.Label16.Text = "SI_ID:"
-        Me.Label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'frmTools
         '
@@ -693,6 +716,7 @@ Partial Class frmTools
         Me.tabAddDBCredentials.ResumeLayout(False)
         Me.GroupBox7.ResumeLayout(False)
         Me.GroupBox7.PerformLayout()
+        Me.tabResetAdminPW.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -752,4 +776,6 @@ Partial Class frmTools
     Friend WithEvents btnLoadListOfUsersToDB As Button
     Friend WithEvents txtLoadListOfUsersToDBSQLServerName As TextBox
     Friend WithEvents Label10 As Label
+    Friend WithEvents tabResetAdminPW As TabPage
+    Friend WithEvents btnResetAdminPW As Button
 End Class
