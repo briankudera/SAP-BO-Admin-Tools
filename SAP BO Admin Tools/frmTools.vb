@@ -56,6 +56,7 @@ Public Class frmTools
     Private Sub ConfigureLogger()
 
         Dim config = New LoggingConfiguration()
+
         Dim consoleTarget = New ColoredConsoleTarget("target1") With {
             .Layout = "${date:format=HH\:mm\:ss} ${level} ${message} ${exception}"
         }
@@ -68,18 +69,18 @@ Public Class frmTools
         }
         config.AddTarget(fileTarget)
 
-        config.AddRuleForOneLevel(LogLevel.[Error], fileTarget)
+        config.AddRuleForOneLevel(LogLevel.[Debug], fileTarget)
         config.AddRuleForAllLevels(consoleTarget)
 
         LogManager.Configuration = config
 
         'Example logger calls
-        'logger.Trace("trace log message")
-        'logger.Debug("debug log message")
-        'logger.Info("info log message")
-        'logger.Warn("warn log message")
-        'logger.[Error]("error log message")
-        'logger.Fatal("fatal log message")
+        logger.Trace("trace log message")
+        logger.Debug("debug log message")
+        logger.Info("info log message")
+        logger.Warn("warn log message")
+        logger.[Error]("error log message")
+        logger.Fatal("fatal log message")
 
     End Sub
 
@@ -106,6 +107,8 @@ Public Class frmTools
     End Sub
 
     Private Sub NewBOSession()
+
+        logger.Debug("Begin open session to BI Platform")
 
         Dim mgr As New SessionMgr
         Dim strUserName As String = ""
@@ -149,6 +152,8 @@ Public Class frmTools
     End Sub
 
     Private Sub LogoffBOSession()
+
+        logger.Debug("Begin close session to BI Platform")
 
         Me.boEnterpriseSession.Logoff()
         Me.boEnterpriseSession.Dispose()
@@ -430,14 +435,19 @@ Public Class frmTools
 
     Protected Sub GetBOUserList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "", Optional strSIID As String = "")
 
+
+        logger.Debug("Begin GetBOUserList")
+
         Dim strQuery As String
 
         Me.NewBOSession()
 
         If strSIID <> "" Then
             strQuery = ("Select TOP 10000 * FROM CI_SYSTEMOBJECTS Where SI_KIND='User' AND SI_ID = " + strSIID + " ORDER BY SI_ID")
+            logger.Debug("Finished building query for GetBOUserList for specific SIID")
         Else
             strQuery = ("Select TOP 10000 * FROM CI_SYSTEMOBJECTS Where SI_KIND='User' ORDER BY SI_ID")
+            logger.Debug("Finished building query for GetBOUserList for ALL")
         End If
 
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
@@ -447,6 +457,8 @@ Public Class frmTools
             Dim arrResults As String() = New String() {"Count of users found: (", objects.Count.ToString(), ChrW(13) & ChrW(10)}
             Me.rtbOutput.AppendText(String.Concat(arrResults))
         End If
+
+        logger.Debug("Queried BI Platform for list of user(s): Users found: " + objects.Count.ToString)
 
         If (objects.Count > 0) Then
 
@@ -509,6 +521,8 @@ Public Class frmTools
                     TryCast(enumerator, IDisposable).Dispose()
                 End If
             End Try
+        Else
+            logger.Debug("No user(s) found")
         End If
 
         Me.LogoffBOSession()
@@ -587,6 +601,7 @@ Public Class frmTools
 
     Private Sub CreateUserTableForRepo()
 
+        logger.Debug("CreateUserTableForRepo: Begin to create table if not exists: DimSAPBOUser_Stg")
         ExecuteQuery("if Not exists " _
                         & "(select 1 from sysobjects where name='DimSAPBOUser_Stg' and xtype='U') " _
                         & "create table DimSAPBOUser_Stg (" _
@@ -603,6 +618,7 @@ Public Class frmTools
                         & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
                         & " )")
 
+        logger.Debug("CreateUserTableForRepo: Begin to truncate table DimSAPBOUser_Stg")
         ExecuteQuery("truncate table DimSAPBOUser_Stg")
 
     End Sub
