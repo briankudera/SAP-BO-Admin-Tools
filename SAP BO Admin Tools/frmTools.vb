@@ -643,6 +643,8 @@ Public Class frmTools
                         & "   ,SI_KIND varchar(255) null" _
                         & "   ,SI_HAS_CHILDREN bit null default 0" _
                         & "   ,SI_RECURRING bit null default 0" _
+                        & "   ,SI_KEYWORD varchar(255) null" _
+                        & "   ,SI_IS_PUBLICATION_JOB bit null default 0" _
                         & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
                         & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
                         & " )")
@@ -682,7 +684,7 @@ Public Class frmTools
 
     End Sub
 
-    Private Sub LoadObjectToDatabaseStg(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intScheduleStatus As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String)
+    Private Sub LoadObjectToDatabaseStg(strId As String, strCUID As String, strName As String, strOwner As String, intParentFolder As String, blnInstance As String, intScheduleStatus As String, intSize As String, intParentId As String, dteUpdateTimestamp As String, dteCreationTimestamp As String, strKind As String, blnHasChildren As String, blnRecurring As String, strKeyword As String, blnIsPublication As String)
 
         Dim strQuery As String
 
@@ -701,6 +703,8 @@ Public Class frmTools
                  & "      ,SI_KIND" _
                  & "      ,SI_HAS_CHILDREN" _
                  & "      ,SI_RECURRING" _
+                 & "      ,SI_KEYWORD" _
+                 & "      ,SI_IS_PUBLICATION_JOB" _
                  & "     )" _
                  & "VALUES" _
                  & "     (" _
@@ -718,6 +722,8 @@ Public Class frmTools
                  & "         ,'" + strKind + "'              " _
                  & "         ," + blnHasChildren + "         " _
                  & "         ," + blnRecurring + "           " _
+                 & "         ,'" + strKeyword + "'              " _
+                 & "         ," + blnIsPublication + "           " _
                  & "     )"
 
         ExecuteQuery(strQuery)
@@ -763,13 +769,15 @@ Public Class frmTools
         Dim strSIID As String = Me.txtSIID.Text.ToString()
         If strSIID <> "" Then
             'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
-            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
+            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox') AND SI_ID = " + strSIID)
         Else
             'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
-            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
+            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox')")
         End If
 
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
+
+        logger.[Debug]("GetBOObjectList: Queried CI_INFOOBJECTS and found records: " + objects.Count.ToString())
 
         If (objects.Count > 0) Then
 
@@ -777,6 +785,7 @@ Public Class frmTools
 
             'Create stage table
             CreateObjectTableForRepo()
+            logger.[Debug]("GetBOObjectList: Finished creating/truncating the staging table")
 
             Dim enumerator As IEnumerator
             Try
@@ -823,10 +832,30 @@ Public Class frmTools
                         Exit Try
                     End Try
 
+                    'This property may not exist
+                    Dim strKeyword As String
+                    Try
+                        strKeyword = current.Properties.Item("SI_KEYWORD").Value.ToString()
+                    Catch ex As Exception
+                        strKeyword = ""
+                        Exit Try
+                    End Try
 
-                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intScheduleStatus, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring)
+                    'This property may not exist
+                    Dim blnIsPublication As String
+                    Try
+                        blnIsPublication = If(current.Properties.Item("SI_IS_PUBLICATION_JOB").Value.ToString() = "False", "0", "1")
+                    Catch ex As Exception
+                        blnIsPublication = 0
+                        Exit Try
+                    End Try
+
+
+                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intScheduleStatus, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring, strKeyword, blnIsPublication)
 
                 Loop
+            Catch ex As Exception
+                logger.[Error](ex, "ow noos! Error while querying and parsing Infostore for a list of objects")
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
