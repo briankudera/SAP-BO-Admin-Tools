@@ -88,6 +88,9 @@ Partial Class frmTools
         Me.btnResetAdminPW = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
+        Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
+        Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
+        Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -103,6 +106,7 @@ Partial Class frmTools
         Me.tabAddDBCredentials.SuspendLayout()
         Me.GroupBox7.SuspendLayout()
         Me.tabResetAdminPW.SuspendLayout()
+        Me.tabUpdateOwnersOnDocsFromCSV.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -204,6 +208,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabExtractRepo)
         Me.tabFunctions.Controls.Add(Me.tabAddDBCredentials)
         Me.tabFunctions.Controls.Add(Me.tabResetAdminPW)
+        Me.tabFunctions.Controls.Add(Me.tabUpdateOwnersOnDocsFromCSV)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -671,6 +676,35 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
+        'tabUpdateOwnersOnDocsFromCSV
+        '
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.txtCSVFilePath)
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.btnUpdateOwnersOnDocsFromCSV)
+        Me.tabUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(4, 22)
+        Me.tabUpdateOwnersOnDocsFromCSV.Name = "tabUpdateOwnersOnDocsFromCSV"
+        Me.tabUpdateOwnersOnDocsFromCSV.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(550, 92)
+        Me.tabUpdateOwnersOnDocsFromCSV.TabIndex = 8
+        Me.tabUpdateOwnersOnDocsFromCSV.Text = "Update Owners On Docs from CSV"
+        Me.tabUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        '
+        'btnUpdateOwnersOnDocsFromCSV
+        '
+        Me.btnUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(252, 32)
+        Me.btnUpdateOwnersOnDocsFromCSV.Name = "btnUpdateOwnersOnDocsFromCSV"
+        Me.btnUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(252, 31)
+        Me.btnUpdateOwnersOnDocsFromCSV.TabIndex = 0
+        Me.btnUpdateOwnersOnDocsFromCSV.Text = "Update Owners on Docs from CSV"
+        Me.btnUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        '
+        'txtCSVFilePath
+        '
+        Me.txtCSVFilePath.Location = New System.Drawing.Point(44, 38)
+        Me.txtCSVFilePath.Name = "txtCSVFilePath"
+        Me.txtCSVFilePath.Size = New System.Drawing.Size(193, 20)
+        Me.txtCSVFilePath.TabIndex = 1
+        Me.txtCSVFilePath.Text = "C:\SAP\ListOfObjectsAndOwner.txt"
+        '
         'frmTools
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -717,6 +751,8 @@ Partial Class frmTools
         Me.GroupBox7.ResumeLayout(False)
         Me.GroupBox7.PerformLayout()
         Me.tabResetAdminPW.ResumeLayout(False)
+        Me.tabUpdateOwnersOnDocsFromCSV.ResumeLayout(False)
+        Me.tabUpdateOwnersOnDocsFromCSV.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -778,4 +814,7 @@ Partial Class frmTools
     Friend WithEvents Label10 As Label
     Friend WithEvents tabResetAdminPW As TabPage
     Friend WithEvents btnResetAdminPW As Button
+    Friend WithEvents tabUpdateOwnersOnDocsFromCSV As TabPage
+    Friend WithEvents txtCSVFilePath As TextBox
+    Friend WithEvents btnUpdateOwnersOnDocsFromCSV As Button
 End Class
