@@ -86,11 +86,19 @@ Partial Class frmTools
         Me.Label14 = New System.Windows.Forms.Label()
         Me.tabResetAdminPW = New System.Windows.Forms.TabPage()
         Me.btnResetAdminPW = New System.Windows.Forms.Button()
+        Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
+        Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
+        Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
-        Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
-        Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
+        Me.tabLoadObjectPropertiesToDB = New System.Windows.Forms.TabPage()
+        Me.txtLoadObjectPropertiesSIID = New System.Windows.Forms.TextBox()
+        Me.Label17 = New System.Windows.Forms.Label()
+        Me.txtLoadObjectPropertiesDB = New System.Windows.Forms.TextBox()
+        Me.Label18 = New System.Windows.Forms.Label()
+        Me.txtLoadObjectPropertiesServer = New System.Windows.Forms.TextBox()
+        Me.Label19 = New System.Windows.Forms.Label()
+        Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -107,6 +115,7 @@ Partial Class frmTools
         Me.GroupBox7.SuspendLayout()
         Me.tabResetAdminPW.SuspendLayout()
         Me.tabUpdateOwnersOnDocsFromCSV.SuspendLayout()
+        Me.tabLoadObjectPropertiesToDB.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -209,6 +218,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabAddDBCredentials)
         Me.tabFunctions.Controls.Add(Me.tabResetAdminPW)
         Me.tabFunctions.Controls.Add(Me.tabUpdateOwnersOnDocsFromCSV)
+        Me.tabFunctions.Controls.Add(Me.tabLoadObjectPropertiesToDB)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -659,6 +669,35 @@ Partial Class frmTools
         Me.btnResetAdminPW.Text = "Reset Admin PW"
         Me.btnResetAdminPW.UseVisualStyleBackColor = True
         '
+        'tabUpdateOwnersOnDocsFromCSV
+        '
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.txtCSVFilePath)
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.btnUpdateOwnersOnDocsFromCSV)
+        Me.tabUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(4, 22)
+        Me.tabUpdateOwnersOnDocsFromCSV.Name = "tabUpdateOwnersOnDocsFromCSV"
+        Me.tabUpdateOwnersOnDocsFromCSV.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(550, 92)
+        Me.tabUpdateOwnersOnDocsFromCSV.TabIndex = 8
+        Me.tabUpdateOwnersOnDocsFromCSV.Text = "Update Owners On Docs from CSV"
+        Me.tabUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        '
+        'txtCSVFilePath
+        '
+        Me.txtCSVFilePath.Location = New System.Drawing.Point(44, 38)
+        Me.txtCSVFilePath.Name = "txtCSVFilePath"
+        Me.txtCSVFilePath.Size = New System.Drawing.Size(193, 20)
+        Me.txtCSVFilePath.TabIndex = 1
+        Me.txtCSVFilePath.Text = "C:\SAP\ListOfObjectsAndOwner.txt"
+        '
+        'btnUpdateOwnersOnDocsFromCSV
+        '
+        Me.btnUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(252, 32)
+        Me.btnUpdateOwnersOnDocsFromCSV.Name = "btnUpdateOwnersOnDocsFromCSV"
+        Me.btnUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(252, 31)
+        Me.btnUpdateOwnersOnDocsFromCSV.TabIndex = 0
+        Me.btnUpdateOwnersOnDocsFromCSV.Text = "Update Owners on Docs from CSV"
+        Me.btnUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        '
         'rtbOutput
         '
         Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
@@ -676,34 +715,81 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
-        'tabUpdateOwnersOnDocsFromCSV
+        'tabLoadObjectPropertiesToDB
         '
-        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.txtCSVFilePath)
-        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.btnUpdateOwnersOnDocsFromCSV)
-        Me.tabUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(4, 22)
-        Me.tabUpdateOwnersOnDocsFromCSV.Name = "tabUpdateOwnersOnDocsFromCSV"
-        Me.tabUpdateOwnersOnDocsFromCSV.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(550, 92)
-        Me.tabUpdateOwnersOnDocsFromCSV.TabIndex = 8
-        Me.tabUpdateOwnersOnDocsFromCSV.Text = "Update Owners On Docs from CSV"
-        Me.tabUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertiesSIID)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.Label17)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertiesDB)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.Label18)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertiesServer)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.Label19)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.btnLoadObjectPropertiesToDB)
+        Me.tabLoadObjectPropertiesToDB.Location = New System.Drawing.Point(4, 22)
+        Me.tabLoadObjectPropertiesToDB.Name = "tabLoadObjectPropertiesToDB"
+        Me.tabLoadObjectPropertiesToDB.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabLoadObjectPropertiesToDB.Size = New System.Drawing.Size(550, 92)
+        Me.tabLoadObjectPropertiesToDB.TabIndex = 9
+        Me.tabLoadObjectPropertiesToDB.Text = "Load Object Properties to DB"
+        Me.tabLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
         '
-        'btnUpdateOwnersOnDocsFromCSV
+        'txtLoadObjectPropertiesSIID
         '
-        Me.btnUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(252, 32)
-        Me.btnUpdateOwnersOnDocsFromCSV.Name = "btnUpdateOwnersOnDocsFromCSV"
-        Me.btnUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(252, 31)
-        Me.btnUpdateOwnersOnDocsFromCSV.TabIndex = 0
-        Me.btnUpdateOwnersOnDocsFromCSV.Text = "Update Owners on Docs from CSV"
-        Me.btnUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
+        Me.txtLoadObjectPropertiesSIID.Location = New System.Drawing.Point(109, 11)
+        Me.txtLoadObjectPropertiesSIID.Name = "txtLoadObjectPropertiesSIID"
+        Me.txtLoadObjectPropertiesSIID.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadObjectPropertiesSIID.TabIndex = 23
         '
-        'txtCSVFilePath
+        'Label17
         '
-        Me.txtCSVFilePath.Location = New System.Drawing.Point(44, 38)
-        Me.txtCSVFilePath.Name = "txtCSVFilePath"
-        Me.txtCSVFilePath.Size = New System.Drawing.Size(193, 20)
-        Me.txtCSVFilePath.TabIndex = 1
-        Me.txtCSVFilePath.Text = "C:\SAP\ListOfObjectsAndOwner.txt"
+        Me.Label17.Location = New System.Drawing.Point(6, 8)
+        Me.Label17.Name = "Label17"
+        Me.Label17.Size = New System.Drawing.Size(105, 23)
+        Me.Label17.TabIndex = 22
+        Me.Label17.Text = "SI_ID:"
+        Me.Label17.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtLoadObjectPropertiesDB
+        '
+        Me.txtLoadObjectPropertiesDB.Location = New System.Drawing.Point(109, 60)
+        Me.txtLoadObjectPropertiesDB.Name = "txtLoadObjectPropertiesDB"
+        Me.txtLoadObjectPropertiesDB.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadObjectPropertiesDB.TabIndex = 21
+        Me.txtLoadObjectPropertiesDB.Text = "BI_Configuration"
+        '
+        'Label18
+        '
+        Me.Label18.Location = New System.Drawing.Point(6, 57)
+        Me.Label18.Name = "Label18"
+        Me.Label18.Size = New System.Drawing.Size(105, 23)
+        Me.Label18.TabIndex = 20
+        Me.Label18.Text = "&Database Name:"
+        Me.Label18.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtLoadObjectPropertiesServer
+        '
+        Me.txtLoadObjectPropertiesServer.Location = New System.Drawing.Point(109, 34)
+        Me.txtLoadObjectPropertiesServer.Name = "txtLoadObjectPropertiesServer"
+        Me.txtLoadObjectPropertiesServer.Size = New System.Drawing.Size(220, 20)
+        Me.txtLoadObjectPropertiesServer.TabIndex = 19
+        Me.txtLoadObjectPropertiesServer.Text = "SQLAG02"
+        '
+        'Label19
+        '
+        Me.Label19.Location = New System.Drawing.Point(6, 31)
+        Me.Label19.Name = "Label19"
+        Me.Label19.Size = New System.Drawing.Size(105, 23)
+        Me.Label19.TabIndex = 18
+        Me.Label19.Text = "&SQL Server:"
+        Me.Label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'btnLoadObjectPropertiesToDB
+        '
+        Me.btnLoadObjectPropertiesToDB.Location = New System.Drawing.Point(361, 34)
+        Me.btnLoadObjectPropertiesToDB.Name = "btnLoadObjectPropertiesToDB"
+        Me.btnLoadObjectPropertiesToDB.Size = New System.Drawing.Size(75, 39)
+        Me.btnLoadObjectPropertiesToDB.TabIndex = 17
+        Me.btnLoadObjectPropertiesToDB.Text = "Extract Repo"
+        Me.btnLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
         '
         'frmTools
         '
@@ -753,6 +839,8 @@ Partial Class frmTools
         Me.tabResetAdminPW.ResumeLayout(False)
         Me.tabUpdateOwnersOnDocsFromCSV.ResumeLayout(False)
         Me.tabUpdateOwnersOnDocsFromCSV.PerformLayout()
+        Me.tabLoadObjectPropertiesToDB.ResumeLayout(False)
+        Me.tabLoadObjectPropertiesToDB.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -817,4 +905,12 @@ Partial Class frmTools
     Friend WithEvents tabUpdateOwnersOnDocsFromCSV As TabPage
     Friend WithEvents txtCSVFilePath As TextBox
     Friend WithEvents btnUpdateOwnersOnDocsFromCSV As Button
+    Friend WithEvents tabLoadObjectPropertiesToDB As TabPage
+    Friend WithEvents txtLoadObjectPropertiesSIID As TextBox
+    Friend WithEvents Label17 As Label
+    Friend WithEvents txtLoadObjectPropertiesDB As TextBox
+    Friend WithEvents Label18 As Label
+    Friend WithEvents txtLoadObjectPropertiesServer As TextBox
+    Friend WithEvents Label19 As Label
+    Friend WithEvents btnLoadObjectPropertiesToDB As Button
 End Class
