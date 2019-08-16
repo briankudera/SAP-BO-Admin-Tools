@@ -31,8 +31,9 @@ Public Class frmTools
     Private cmdTargetServer As String = ""
     Private cmdTargetDB As String = ""
     Private cmdCommandLine As String = ""
+    Private cmdDeltaProcessing As Boolean = 0
 
-    Private strBuildLoadToDatabaseObjectPropertyStgString As String = ""
+    Dim myBOProperties As DataTable
 
     Dim logger As Logger = LogManager.GetLogger("Example")
 
@@ -96,12 +97,15 @@ Public Class frmTools
         cmdCMSAuthentication = arguments(5)
         cmdTargetServer = arguments(6)
         cmdTargetDB = arguments(7)
+        cmdDeltaProcessing = arguments(8)
 
         If cmdAction = "LoadUsersToDB" Then
             GetBOUserList(False, cmdTargetDB, cmdTargetServer)
             GetBOUserList(False, cmdTargetDB, cmdTargetServer)
         ElseIf cmdAction = "LoadObjectsToDB" Then
             GetBOObjectList(False, cmdTargetDB, cmdTargetServer)
+        ElseIf cmdAction = "LoadObjectPropertiesToDB" Then
+            GetBOObjectProperties(False, cmdTargetDB, cmdTargetServer, cmdDeltaProcessing)
         End If
 
         Application.Exit()
@@ -575,6 +579,7 @@ Public Class frmTools
                         Loop
 
                     Catch ex As Exception
+                        logger.[Error](ex, "ow noos! Error in CheckIfUserIsDisabled")
                     Finally
                         If TypeOf objUserEnumerator Is IDisposable Then
                             TryCast(objUserEnumerator, IDisposable).Dispose()
@@ -585,6 +590,7 @@ Public Class frmTools
                 Loop
 
             Catch ex As Exception
+                logger.[Error](ex, "ow noos! Error in CheckIfUserIsDisabled")
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
@@ -656,71 +662,8 @@ Public Class frmTools
     End Sub
 
 
-    Private Sub CreateObjectTableForRecurringReportsRepo()
 
-        ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObjectRecurringReports_Stg' and xtype='U') " _
-                        & "create table DimSAPBOObjectRecurringReports_Stg (" _
-                        & "    SI_ID int not null primary key" _
-                        & "   ,SI_CUID varchar(64) not null" _
-                        & "   ,SI_NAME varchar(255) null" _
-                        & "   ,SI_SUBMITTER varchar(255) null" _
-                        & "   ,SI_NEXTRUNTIME datetime null" _
-                        & "   ,SI_HAS_PROMPTS bit not null default 0" _
-                        & "   ,SI_HAS_PROMPTS bit not null default 0" _
-                        & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
-                        & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
-                        & " )")
-
-        ExecuteQuery("truncate table DimSAPBOObjectRecurringReports_Stg")
-
-    End Sub
-
-
-    Private Sub CreateObjectTableForRecurringReportsPromptRepo()
-
-        ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObjectReportsPrompt_Stg' and xtype='U') " _
-                        & "create table DimSAPBOObjectRecurringReportsPrompt_Stg (" _
-                        & "    SI_ID int not null primary key" _
-                        & "   ,SI_CUID varchar(64) not null" _
-                        & "   ,SI_OBJID varchar(255) null" _
-                        & "   ,SI_TOTAL int null" _
-                        & "   ,PromptRecordNumber tinyint null" _
-                        & "   ,SI_NAME varchar(255) null" _
-                        & "   ,SI_DISABLED bit not null default 0" _
-                        & "   ,SI_VALUES_SI_TOTAL tinyint null" _
-                        & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
-                        & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
-                        & " )")
-
-        ExecuteQuery("truncate table DimSAPBOObjectReportsPrompt_Stg")
-
-    End Sub
-
-
-
-    Private Sub CreateObjectTableForRecurringReportsPromptValueRepo()
-
-        ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObjectReportsPromptValue_Stg' and xtype='U') " _
-                        & "create table DimSAPBOObjectReportsPromptValue_Stg (" _
-                        & "    SI_ID int not null primary key" _
-                        & "   ,SI_CUID varchar(64) not null" _
-                        & "   ,SI_OBJID varchar(255) null" _
-                        & "   ,PromptRecordNumber tinyint null" _
-                        & "   ,PromptValueRecordNumber tinyint null" _
-                        & "   ,PromptValue varchar(255) null" _
-                        & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
-                        & "   ,RecordUpdateTimestamp datetime2(7) not null default sysdatetime()" _
-                        & " )")
-
-        ExecuteQuery("truncate table DimSAPBOObjectReportsPromptValue_Stg")
-
-    End Sub
-
-
-    Private Sub CreateObjectTablePropertyRepo()
+    Private Sub CreateObjectTablePropertyRepoStage()
 
         ExecuteQuery("if Not exists " _
                         & "(select 1 from sysobjects where name='DimSAPBOObjectProperty_Stg' and xtype='U') " _
@@ -730,10 +673,30 @@ Public Class frmTools
                         & "   ,PropertyName varchar(255) null" _
                         & "   ,PropertyValueInstanceNumber int null" _
                         & "   ,PropertyValue varchar(max) null" _
-                        & "   ,RecordInsertTimestamp datetime2(7) not null default sysdatetime()" _
                         & " )")
 
         ExecuteQuery("truncate table DimSAPBOObjectProperty_Stg")
+
+    End Sub
+
+
+    Private Sub CreateObjectTablePropertyRepo()
+
+        ExecuteQuery("if Not exists " _
+                        & "(select 1 from sysobjects where name='DimSAPBOObjectProperty' and xtype='U') " _
+                        & "CREATE TABLE [dbo].[DimSAPBOObjectProperty]" _
+                        & "(" _
+                        & "[ObjectPropertyKey] Int Not NULL IDENTITY(1, 1) PRIMARY KEY," _
+                        & "[SI_ID] [Int] Not NULL," _
+                        & "[ClassName] [varchar](64) COLLATE SQL_Latin1_General_CP1_CI_AS Not NULL," _
+                        & "[PropertyName] [varchar](255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL," _
+                        & "[PropertyValueInstanceNumber] [Int] NULL," _
+                        & "[PropertyValue] [varchar](max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL," _
+                        & "SysStartTime datetime2 GENERATED ALWAYS As ROW START Not NULL," _
+                        & "SysEndTime datetime2 GENERATED ALWAYS As ROW End Not NULL," _
+                        & "PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime) " _
+                        & ") " _
+                        & "With (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.DimSAPBOObjectProperty_History))")
 
     End Sub
 
@@ -815,29 +778,46 @@ Public Class frmTools
 
     Private Sub BuildLoadToDatabaseObjectPropertyStgString(strId As String, strClassName As String, strPropertyName As String, intPropertyValueInstanceNumber As String, strPropertyValue As String)
 
+        ' Add some new rows to the collection.
+        Dim row As DataRow
+        row = myBOProperties.NewRow()
+        row("SI_ID") = strId
+        row("ClassName") = strClassName
+        row("PropertyName") = strPropertyName
+        row("PropertyValueInstanceNumber") = intPropertyValueInstanceNumber
+        row("PropertyValue") = strPropertyValue
+        myBOProperties.Rows.Add(row)
 
-        If strBuildLoadToDatabaseObjectPropertyStgString = "" Then
-            strBuildLoadToDatabaseObjectPropertyStgString = " (" + strId + ",'" + strClassName + "','" + strPropertyName + "','" + Replace(strPropertyValue, "'", "''") + "'," + intPropertyValueInstanceNumber + ")"
-        Else
-            strBuildLoadToDatabaseObjectPropertyStgString += ",(" + strId + ",'" + strClassName + "','" + strPropertyName + "','" + Replace(strPropertyValue, "'", "''") + "'," + intPropertyValueInstanceNumber + ")"
-        End If
+        myBOProperties.AcceptChanges()
+
 
     End Sub
     Private Sub LoadToDatabaseObjectPropertyStgString()
 
-        Dim strQuery As String
+        Try
 
-        strQuery = "INSERT INTO dbo.DimSAPBOObjectProperty_Stg" _
-                 & "     ( SI_ID" _
-                 & "      ,ClassName" _
-                 & "      ,PropertyName" _
-                 & "      ,PropertyValue" _
-                 & "      ,PropertyValueInstanceNumber" _
-                 & "     )" _
-                 & "VALUES" _
-                 & strBuildLoadToDatabaseObjectPropertyStgString
+            conSQLConn.Open()
 
-        ExecuteQuery(strQuery)
+            Using bulkCopy As SqlBulkCopy =
+              New SqlBulkCopy(conSQLConn)
+                bulkCopy.DestinationTableName = "dbo.DimSAPBOObjectProperty_Stg"
+
+                Try
+                    ' Write from the source to the destination.
+                    bulkCopy.WriteToServer(myBOProperties)
+
+                Catch ex As Exception
+                    logger.[Error](ex, "ow noos! Error in LoadToDatabaseObjectPropertyStgString")
+                End Try
+            End Using
+
+            conSQLConn.Close()
+
+        Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error in LoadToDatabaseObjectPropertyStgString")
+            Exit Try
+        End Try
+        myBOProperties = Nothing
 
     End Sub
     Private Sub SetSQLConnection(strDB As String, strServer As String)
@@ -857,6 +837,7 @@ Public Class frmTools
             cmdSQLCmd.ExecuteNonQuery()
 
         Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error in ExecuteQuery")
             Exit Try
         End Try
 
@@ -877,10 +858,8 @@ Public Class frmTools
         Dim strQuery As String
         Dim strSIID As String = Me.txtSIID.Text.ToString()
         If strSIID <> "" Then
-            'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
             strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox') AND SI_ID = " + strSIID)
         Else
-            'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
             strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox')")
         End If
 
@@ -977,7 +956,7 @@ Public Class frmTools
 
     End Sub
 
-    Protected Sub LoadObjectProperties(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
+    Protected Sub GetBOObjectProperties(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "", Optional blnDeltas As Boolean = 1)
 
         Me.NewBOSession()
 
@@ -1001,30 +980,37 @@ Public Class frmTools
         Dim strSIID As String = Me.txtLoadObjectPropertiesSIID.Text.ToString()
 
         If strSIID <> "" Then
-            'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder') AND SI_ID = " + strSIID)
             strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox') AND SI_ID = " + strSIID)
         Else
-            'strQuery = ("Select TOP 1000000 SI_ID, SI_CUID, SI_NAME, SI_OWNER, SI_PARENT_FOLDER, SI_INSTANCE, SI_SIZE, SI_PARENTID, SI_UPDATE_TS, SI_CREATION_TIME, SI_KIND, SI_HAS_CHILDREN, SI_RECURRING, SI_SCHEDULE_STATUS FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder')")
             strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_KIND IN ('CrystalReport','Excel','Pdf','Webi','XL.XcelsiusApplication','Folder','FavoritesFolder','Publication','Inbox')")
         End If
+
+        SetSQLConnection(strDatabaseName, strSQLServerName)
+
+        If blnDeltas Then
+            Dim strLastUpdateTimestamp = GetLoadObjectPropertiesDeltaTimestamp()
+            strQuery = strQuery + " AND SI_UPDATE_TS > '" + strLastUpdateTimestamp + "'"
+        End If
+
+        CreateObjectTablePropertyRepo()
 
         Dim myInfoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
 
         If myInfoObjects.Count > 0 Then
 
-            SetSQLConnection(strDatabaseName, strSQLServerName)
-            CreateObjectTablePropertyRepo()
+            CreateObjectTablePropertyRepoStage()
+            MakeDataTableForObjectPropertyList()
 
-            strClass = "Properties"
             For iLoop = 1 To myInfoObjects.Count
 
+                strId = myInfoObjects(iLoop).Properties.Item("SI_ID").Value.ToString()
+
                 If myInfoObjects(iLoop).Properties.Count > 0 Then
-                    strId = myInfoObjects(iLoop).Properties.Item("SI_ID").Value.ToString()
+                    strClass = "Properties"
                     For iProp1 = 1 To myInfoObjects(iLoop).Properties.Count
 
                         strProperty1 = myInfoObjects(iLoop).Properties(iProp1).Name.ToString()
                         strPropertyValue1 = myInfoObjects(iLoop).Properties(iProp1).Value.ToString()
-
                         If (strProperty1 <> "SI_ID") And (strPropertyValue1 <> "System.__ComObject") Then
                             BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1, iProp1, strPropertyValue1)
                         End If
@@ -1056,163 +1042,167 @@ Public Class frmTools
                 End If
 
 
-                strClass = "Processing"
-                If myInfoObjects(iLoop).ProcessingInfo.Properties.Count > 0 Then
-                    For iProp1 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties.Count
+                If (myInfoObjects(iLoop).Kind <> "Folder") And (myInfoObjects(iLoop).Kind <> "FavoritesFolder") And (myInfoObjects(iLoop).Kind <> "Inbox") Then
+                    If myInfoObjects(iLoop).ProcessingInfo.Properties.Count > 0 Then
+                        strClass = "Processing"
 
-                        strProperty1 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Name.ToString()
-                        strPropertyValue1 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Value.ToString()
-                        If (strPropertyValue1 <> "SI_ID" And strPropertyValue1 <> "System.__ComObject") Then
-                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1, iProp1, strPropertyValue1)
-                        End If
+                        For iProp1 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties.Count
 
-                        If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties.Count > 0 Then
-                            For iProp2 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties.Count
+                            strProperty1 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Name.ToString()
+                            strPropertyValue1 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Value.ToString()
+                            If (strPropertyValue1 <> "SI_ID" And strPropertyValue1 <> "System.__ComObject") Then
+                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1, iProp1, strPropertyValue1)
+                            End If
 
-                                strProperty2 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Name.ToString()
-                                strPropertyValue2 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Value.ToString
-                                If (strPropertyValue2 <> "System.__ComObject") Then
-                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2, iProp2, strPropertyValue2)
-                                End If
+                            If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties.Count > 0 Then
+                                For iProp2 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties.Count
 
-                                If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties.Count > 0 Then
-                                    For iProp3 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties.Count
+                                    strProperty2 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Name.ToString()
+                                    strPropertyValue2 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Value.ToString
+                                    If (strPropertyValue2 <> "System.__ComObject") Then
+                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2, iProp2, strPropertyValue2)
+                                    End If
 
-                                        strProperty3 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Name.ToString()
-                                        strPropertyValue3 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Value.ToString
-                                        If (strPropertyValue3 <> "System.__ComObject") Then
-                                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3, iProp3, strPropertyValue3)
-                                        End If
+                                    If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties.Count > 0 Then
+                                        For iProp3 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties.Count
 
-                                        If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count > 0 Then
-                                            For iProp4 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count
+                                            strProperty3 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Name.ToString()
+                                            strPropertyValue3 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Value.ToString
+                                            If (strPropertyValue3 <> "System.__ComObject") Then
+                                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3, iProp3, strPropertyValue3)
+                                            End If
 
-                                                strProperty4 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Name.ToString()
-                                                strPropertyValue4 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Value.ToString
-                                                If (strPropertyValue4 <> "System.__ComObject") Then
-                                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4, iProp4, strPropertyValue4)
-                                                End If
+                                            If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count > 0 Then
+                                                For iProp4 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count
 
-                                                If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count > 0 Then
-                                                    For iProp5 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count
+                                                    strProperty4 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Name.ToString()
+                                                    strPropertyValue4 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Value.ToString
+                                                    If (strPropertyValue4 <> "System.__ComObject") Then
+                                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4, iProp4, strPropertyValue4)
+                                                    End If
 
-                                                        strProperty5 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Name.ToString()
-                                                        strPropertyValue5 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Value.ToString
-                                                        If (strPropertyValue5 <> "System.__ComObject") Then
-                                                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5, iProp5, strPropertyValue5)
-                                                        End If
+                                                    If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count > 0 Then
+                                                        For iProp5 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count
 
-                                                        If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count > 0 Then
-                                                            For iProp6 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count
+                                                            strProperty5 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Name.ToString()
+                                                            strPropertyValue5 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Value.ToString
+                                                            If (strPropertyValue5 <> "System.__ComObject") Then
+                                                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5, iProp5, strPropertyValue5)
+                                                            End If
 
-                                                                strProperty6 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Name.ToString()
-                                                                strPropertyValue6 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Value.ToString()
-                                                                If (strPropertyValue6 <> "System.__ComObject") Then
-                                                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6, iProp6, strPropertyValue6)
-                                                                End If
+                                                            If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count > 0 Then
+                                                                For iProp6 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count
 
-                                                                If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties.Count > 0 Then
-                                                                    For iProp7 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties.Count
+                                                                    strProperty6 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Name.ToString()
+                                                                    strPropertyValue6 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Value.ToString()
+                                                                    If (strPropertyValue6 <> "System.__ComObject") Then
+                                                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6, iProp6, strPropertyValue6)
+                                                                    End If
 
-                                                                        strProperty7 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties(iProp7).Name.ToString()
-                                                                        strPropertyValue7 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties(iProp7).Value.ToString
-                                                                        If (strPropertyValue7 <> "System.__ComObject") Then
-                                                                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6 + strProperty7, iProp7, strPropertyValue7)
-                                                                        End If
+                                                                    If myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties.Count > 0 Then
+                                                                        For iProp7 = 1 To myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties.Count
 
-                                                                    Next
-                                                                End If
+                                                                            strProperty7 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties(iProp7).Name.ToString()
+                                                                            strPropertyValue7 = myInfoObjects(iLoop).ProcessingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Properties(iProp7).Value.ToString
+                                                                            If (strPropertyValue7 <> "System.__ComObject") Then
+                                                                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6 + strProperty7, iProp7, strPropertyValue7)
+                                                                            End If
 
-                                                            Next
-                                                        End If
+                                                                        Next
+                                                                    End If
 
-                                                    Next
-                                                End If
+                                                                Next
+                                                            End If
 
-                                            Next
-                                        End If
+                                                        Next
+                                                    End If
 
-                                    Next
-                                End If
-                            Next
-                        End If
-                    Next
-                End If
+                                                Next
+                                            End If
 
-
-                strClass = "Scheduling"
-                If myInfoObjects(iLoop).SchedulingInfo.Properties.Count > 0 Then
-                    For iProp1 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties.Count
-
-                        strProperty1 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Name.ToString()
-                        strPropertyValue1 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Value.ToString()
-                        If (strProperty1 <> "SI_ID") And (strPropertyValue1 <> "System.__ComObject") Then
-                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1, iProp1, strPropertyValue1)
-                        End If
+                                        Next
+                                    End If
+                                Next
+                            End If
+                        Next
+                    End If
 
 
-                        If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties.Count > 0 Then
-                            For iProp2 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties.Count
+                    If myInfoObjects(iLoop).SchedulingInfo.Properties.Count > 0 Then
+                        For iProp1 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties.Count
+                            strClass = "Scheduling"
 
-                                strProperty2 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Name.ToString()
-                                strPropertyValue2 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Value.ToString
-                                If (strPropertyValue2 <> "System.__ComObject") Then
-                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2, iProp2, strPropertyValue2)
-                                End If
-
-                                If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties.Count > 0 Then
-                                    For iProp3 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties.Count
-
-                                        strProperty3 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Name.ToString()
-                                        strPropertyValue3 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Value.ToString
-                                        If (strPropertyValue3 <> "System.__ComObject") Then
-                                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3, iProp3, strPropertyValue3)
-                                        End If
-
-                                        If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count > 0 Then
-                                            For iProp4 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count
-
-                                                strProperty4 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Name.ToString()
-                                                strPropertyValue4 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Value.ToString
-                                                If (strPropertyValue4 <> "System.__ComObject") Then
-                                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4, iProp4, strPropertyValue4)
-                                                End If
-
-                                                If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count > 0 Then
-                                                    For iProp5 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count
-
-                                                        strProperty5 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Name.ToString()
-                                                        strPropertyValue5 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Value.ToString
-                                                        If (strPropertyValue5 <> "System.__ComObject") Then
-                                                            BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5, iProp5, strPropertyValue5)
-                                                        End If
-
-                                                        If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count > 0 Then
-                                                            For iProp6 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count
-
-                                                                strProperty6 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Name.ToString()
-                                                                strPropertyValue6 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Value.ToString
-                                                                If (strPropertyValue6 <> "System.__ComObject") Then
-                                                                    BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6, iProp6, strPropertyValue6)
-                                                                End If
-                                                            Next
-                                                        End If
-
-                                                    Next
-                                                End If
-
-                                            Next
-                                        End If
-
-                                    Next
-                                End If
+                            strProperty1 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Name.ToString()
+                            strPropertyValue1 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Value.ToString()
+                            If (strProperty1 <> "SI_ID") And (strPropertyValue1 <> "System.__ComObject") Then
+                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1, iProp1, strPropertyValue1)
+                            End If
 
 
-                            Next
-                        End If
+                            If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties.Count > 0 Then
+                                For iProp2 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties.Count
+
+                                    strProperty2 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Name.ToString()
+                                    strPropertyValue2 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Value.ToString
+                                    If (strPropertyValue2 <> "System.__ComObject") Then
+                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2, iProp2, strPropertyValue2)
+                                    End If
+
+                                    If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties.Count > 0 Then
+                                        For iProp3 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties.Count
+
+                                            strProperty3 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Name.ToString()
+                                            strPropertyValue3 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Value.ToString
+                                            If (strPropertyValue3 <> "System.__ComObject") Then
+                                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3, iProp3, strPropertyValue3)
+                                            End If
+
+                                            If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count > 0 Then
+                                                For iProp4 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties.Count
+
+                                                    strProperty4 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Name.ToString()
+                                                    strPropertyValue4 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Value.ToString
+                                                    If (strPropertyValue4 <> "System.__ComObject") Then
+                                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4, iProp4, strPropertyValue4)
+                                                    End If
+
+                                                    If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count > 0 Then
+                                                        For iProp5 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties.Count
+
+                                                            strProperty5 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Name.ToString()
+                                                            strPropertyValue5 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Value.ToString
+                                                            If (strPropertyValue5 <> "System.__ComObject") Then
+                                                                BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5, iProp5, strPropertyValue5)
+                                                            End If
+
+                                                            If myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count > 0 Then
+                                                                For iProp6 = 1 To myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties.Count
+
+                                                                    strProperty6 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Name.ToString()
+                                                                    strPropertyValue6 = myInfoObjects(iLoop).SchedulingInfo.Properties(iProp1).Properties(iProp2).Properties(iProp3).Properties(iProp4).Properties(iProp5).Properties(iProp6).Value.ToString
+                                                                    If (strPropertyValue6 <> "System.__ComObject") Then
+                                                                        BuildLoadToDatabaseObjectPropertyStgString(strId, strClass, strProperty1 + "." + strProperty2 + "." + strProperty3 + "." + strProperty4 + "." + strProperty5 + "." + strProperty6, iProp6, strPropertyValue6)
+                                                                    End If
+                                                                Next
+                                                            End If
+
+                                                        Next
+                                                    End If
+
+                                                Next
+                                            End If
+
+                                        Next
+                                    End If
 
 
-                    Next
+                                Next
+                            End If
+
+
+                        Next
+                    End If
+
                 End If
 
             Next
@@ -1220,114 +1210,13 @@ Public Class frmTools
             'Finally, write to SQL Server
             LoadToDatabaseObjectPropertyStgString()
 
+            MergeObjectPropertyList(blnDeltas)
+
         End If
         Me.LogoffBOSession()
 
     End Sub
 
-    Protected Sub GetBOScheduledObjectList(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "")
-
-        Me.NewBOSession()
-
-        Dim strQuery As String
-        Dim strSIID As String = Me.txtSIID.Text.ToString()
-        If strSIID <> "" Then
-            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_RECURRING = 1 AND SI_ID = " + strSIID)
-        Else
-            strQuery = ("Select TOP 1000000 * FROM CI_INFOOBJECTS Where SI_RECURRING = 1")
-        End If
-
-        Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
-
-        logger.[Debug]("GetBOScheduledObjectList: Queried CI_INFOOBJECTS and found records: " + objects.Count.ToString())
-
-        If (objects.Count > 0) Then
-
-            SetSQLConnection(strDatabaseName, strSQLServerName)
-
-            'Create stage table
-            CreateObjectTableForRepo()
-            logger.[Debug]("GetBOObjectList: Finished creating/truncating the staging table")
-
-            Dim enumerator As IEnumerator
-            Try
-                enumerator = objects.GetEnumerator
-                Do While enumerator.MoveNext
-                    Dim current As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                    Dim strId As String = current.Properties.Item("SI_ID").Value.ToString()
-                    Dim strCUID As String = current.Properties.Item("SI_CUID").Value.ToString()
-                    Dim strName As String = current.Properties.Item("SI_NAME").Value.ToString()
-                    Dim strOwner As String = current.Properties.Item("SI_OWNER").Value.ToString()
-                    Dim intParentFolder As String = current.Properties.Item("SI_PARENT_FOLDER").Value.ToString()
-                    Dim blnInstance As String = If(current.Properties.Item("SI_INSTANCE").Value.ToString() = "False", "0", "1")
-
-                    Dim intParentId As String = current.Properties.Item("SI_PARENTID").Value.ToString()
-                    Dim dteUpdateTimestamp As String = current.Properties.Item("SI_UPDATE_TS").Value.ToString()
-                    Dim dteCreationTimestamp As String = current.Properties.Item("SI_CREATION_TIME").Value.ToString()
-                    Dim strKind As String = current.Properties.Item("SI_KIND").Value.ToString()
-                    Dim blnHasChildren As String = If(current.Properties.Item("SI_HAS_CHILDREN").Value.ToString() = "False", "0", "1")
-
-                    'This property may not exist
-                    Dim intSize As String
-                    Try
-                        intSize = current.Properties.Item("SI_SIZE").Value.ToString()
-                    Catch ex As Exception
-                        intSize = 0
-                        Exit Try
-                    End Try
-
-                    'This property may not exist
-                    Dim blnRecurring As String
-                    Try
-                        blnRecurring = If(current.Properties.Item("SI_RECURRING").Value.ToString() = "False", "0", "1")
-                    Catch ex As Exception
-                        blnRecurring = 0
-                        Exit Try
-                    End Try
-
-                    'This property may not exist
-                    Dim intScheduleStatus As String
-                    Try
-                        intScheduleStatus = current.Properties.Item("SI_SCHEDULE_STATUS").Value.ToString()
-                    Catch ex As Exception
-                        intScheduleStatus = -1
-                        Exit Try
-                    End Try
-
-                    'This property may not exist
-                    Dim strKeyword As String
-                    Try
-                        strKeyword = current.Properties.Item("SI_KEYWORD").Value.ToString()
-                    Catch ex As Exception
-                        strKeyword = ""
-                        Exit Try
-                    End Try
-
-                    'This property may not exist
-                    Dim blnIsPublication As String
-                    Try
-                        blnIsPublication = If(current.Properties.Item("SI_IS_PUBLICATION_JOB").Value.ToString() = "False", "0", "1")
-                    Catch ex As Exception
-                        blnIsPublication = 0
-                        Exit Try
-                    End Try
-
-
-                    LoadObjectToDatabaseStg(strId, strCUID, strName, strOwner, intParentFolder, blnInstance, intScheduleStatus, intSize, intParentId, dteUpdateTimestamp, dteCreationTimestamp, strKind, blnHasChildren, blnRecurring, strKeyword, blnIsPublication)
-
-                Loop
-            Catch ex As Exception
-                logger.[Error](ex, "ow noos! Error while querying and parsing Infostore for a list of objects")
-            Finally
-                If TypeOf enumerator Is IDisposable Then
-                    TryCast(enumerator, IDisposable).Dispose()
-                End If
-            End Try
-        End If
-
-        Me.LogoffBOSession()
-
-    End Sub
 
     Private Sub btnAddDBCredentialsForGroup_Click(sender As Object, e As EventArgs) Handles btnAddDBCredentialsForGroup.Click
 
@@ -1381,6 +1270,157 @@ Public Class frmTools
     End Sub
 
     Private Sub BtnLoadObjectPropertiesToDB_Click(sender As Object, e As EventArgs) Handles btnLoadObjectPropertiesToDB.Click
-        LoadObjectProperties(False, txtLoadObjectPropertiesDB.Text.ToString(), txtLoadObjectPropertiesServer.Text.ToString())
+        GetBOObjectProperties(False, txtLoadObjectPropertiesDB.Text.ToString(), txtLoadObjectPropertiesServer.Text.ToString(), CBool(txtLoadObjectPropertyDelta.Text.ToString))
+    End Sub
+
+    Private Function GetLoadObjectPropertiesDeltaTimestamp() As String
+
+        InitializeETLParmForObjectPropertyDelta()
+
+        Dim strQuery As String = "SELECT ParmValue FROM dbo.ETLParm WHERE ParmName = 'DeltaCMSObjectProperty'"
+        Dim cmdSQLCmd As New SqlCommand(strQuery, conSQLConn)
+        Dim dtParmValue As Date
+
+        Try
+            conSQLConn.Open()
+
+            dtParmValue = CDate(cmdSQLCmd.ExecuteScalar())
+
+        Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error in GetLoadObjectPropertiesDeltaTimestamp")
+            Exit Try
+        End Try
+
+        conSQLConn.Close()
+
+        SetLoadObjectPropertiesDeltaTimestamp()
+
+        GetLoadObjectPropertiesDeltaTimestamp = ConvertDateToString(dtParmValue)
+
+    End Function
+
+    Private Sub SetLoadObjectPropertiesDeltaTimestamp()
+
+        Dim strQuery As String = "UPDATE dbo.ETLParm SET ParmValue = '" + DateTime.Now.AddMinutes(-1).ToString("yyyy-MM-dd HH:mm:ss") + "' WHERE ParmName = 'DeltaCMSObjectProperty'"
+        Dim cmdSQLCmd As New SqlCommand(strQuery, conSQLConn)
+
+        Try
+            conSQLConn.Open()
+
+            cmdSQLCmd.ExecuteNonQuery()
+
+        Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp")
+            Exit Try
+        End Try
+
+        conSQLConn.Close()
+    End Sub
+
+    Private Function ConvertDateToString(dtDateValue As Date) As String
+
+        ConvertDateToString = dtDateValue.ToString("yyyy.MM.dd.HH.mm.ss")
+
+    End Function
+
+    Private Sub InitializeETLParmForObjectPropertyDelta()
+        Dim strQuery As String = "IF NOT EXISTS (SELECT 1 FROM dbo.ETLParm WHERE BI_DBID = 0 AND DBID = 0 AND ParmName = 'DeltaCMSObjectProperty') INSERT INTO dbo.ETLParm (BI_DBID,DBID,ParmName,ParmValue) VALUES (0,0,'DeltaCMSObjectProperty','1901-01-01')"
+        Dim cmdSQLCmd As New SqlCommand(strQuery, conSQLConn)
+
+        Try
+            conSQLConn.Open()
+
+            cmdSQLCmd.ExecuteNonQuery()
+
+        Catch ex As Exception
+            logger.[Error](ex, "ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp")
+            Exit Try
+        End Try
+
+        conSQLConn.Close()
+    End Sub
+
+    Private Sub BtnCheckDeltaTsp_Click(sender As Object, e As EventArgs) Handles btnCheckDeltaTsp.Click
+        SetSQLConnection(txtLoadObjectPropertiesDB.Text.ToString(), txtLoadObjectPropertiesServer.Text.ToString())
+        Me.txtDeltaTsp.Text = GetLoadObjectPropertiesDeltaTimestamp()
+        SetLoadObjectPropertiesDeltaTimestamp()
+    End Sub
+
+    Private Function MakeDataTableForObjectPropertyList() As DataTable
+
+        myBOProperties = New DataTable("MyBOProperties")
+
+        ' Add three column objects to the table.
+        Dim intSI_ID As DataColumn = New DataColumn()
+        intSI_ID.DataType = System.Type.GetType("System.Int32")
+        intSI_ID.ColumnName = "SI_ID"
+        myBOProperties.Columns.Add(intSI_ID)
+
+        Dim strClassName As DataColumn = New DataColumn()
+        strClassName.DataType = System.Type.GetType("System.String")
+        strClassName.ColumnName = "ClassName"
+        myBOProperties.Columns.Add(strClassName)
+
+        Dim strPropertyName As DataColumn = New DataColumn()
+        strPropertyName.DataType = System.Type.GetType("System.String")
+        strPropertyName.ColumnName = "PropertyName"
+        myBOProperties.Columns.Add(strPropertyName)
+
+        Dim intPropertyValueInstanceNumber As DataColumn = New DataColumn()
+        intPropertyValueInstanceNumber.DataType = System.Type.GetType("System.Int32")
+        intPropertyValueInstanceNumber.ColumnName = "PropertyValueInstanceNumber"
+        myBOProperties.Columns.Add(intPropertyValueInstanceNumber)
+
+        Dim strPropertyValue As DataColumn = New DataColumn()
+        strPropertyValue.DataType = System.Type.GetType("System.String")
+        strPropertyValue.ColumnName = "PropertyValue"
+        myBOProperties.Columns.Add(strPropertyValue)
+
+        ' Return the new DataTable.
+        Return myBOProperties
+
+    End Function
+
+    Private Sub MergeObjectPropertyList(blnDelta As Boolean)
+
+        Dim strQuery As String
+        strQuery = ""
+        strQuery = strQuery & "MERGE dbo.DimSAPBOObjectProperty tgt "
+        strQuery = strQuery & "Using dbo.DimSAPBOObjectProperty_Stg src "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "On ( tgt.SI_ID = src.SI_ID "
+        strQuery = strQuery & "     And tgt.ClassName = src.ClassName "
+        strQuery = strQuery & "     And tgt.PropertyName = src.PropertyName "
+        strQuery = strQuery & "     And tgt.PropertyValueInstanceNumber = src.PropertyValueInstanceNumber ) "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "WHEN MATCHED "
+        strQuery = strQuery & "     And "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               NULLIF(src.PropertyValue, tgt.PropertyValue) Is Not NULL "
+        strQuery = strQuery & "          Or NULLIF(tgt.PropertyValue, src.PropertyValue) Is Not NULL "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "THEN UPDATE SET "
+        strQuery = strQuery & "          PropertyValue = src.PropertyValue "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "            SI_ID "
+        strQuery = strQuery & "           ,ClassName "
+        strQuery = strQuery & "           ,PropertyName "
+        strQuery = strQuery & "           ,PropertyValueInstanceNumber "
+        strQuery = strQuery & "           ,PropertyValue ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, ClassName, PropertyName "
+        strQuery = strQuery & "              ,PropertyValueInstanceNumber, PropertyValue "
+        strQuery = strQuery & "          ) "
+        If blnDelta Then
+            strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+            strQuery = strQuery & "THEN DELETE "
+        End If
+        strQuery = strQuery & ";"
+
+        ExecuteQuery(strQuery)
+
     End Sub
 End Class

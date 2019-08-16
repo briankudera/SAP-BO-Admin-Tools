@@ -89,9 +89,9 @@ Partial Class frmTools
         Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
         Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
         Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
-        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
-        Me.Label8 = New System.Windows.Forms.Label()
         Me.tabLoadObjectPropertiesToDB = New System.Windows.Forms.TabPage()
+        Me.txtDeltaTsp = New System.Windows.Forms.TextBox()
+        Me.btnCheckDeltaTsp = New System.Windows.Forms.Button()
         Me.txtLoadObjectPropertiesSIID = New System.Windows.Forms.TextBox()
         Me.Label17 = New System.Windows.Forms.Label()
         Me.txtLoadObjectPropertiesDB = New System.Windows.Forms.TextBox()
@@ -99,6 +99,10 @@ Partial Class frmTools
         Me.txtLoadObjectPropertiesServer = New System.Windows.Forms.TextBox()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
+        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.txtLoadObjectPropertyDelta = New System.Windows.Forms.TextBox()
+        Me.Label20 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -698,25 +702,12 @@ Partial Class frmTools
         Me.btnUpdateOwnersOnDocsFromCSV.Text = "Update Owners on Docs from CSV"
         Me.btnUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
         '
-        'rtbOutput
-        '
-        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
-        Me.rtbOutput.Name = "rtbOutput"
-        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
-        Me.rtbOutput.TabIndex = 11
-        Me.rtbOutput.Text = ""
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(8, 274)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(39, 13)
-        Me.Label8.TabIndex = 12
-        Me.Label8.Text = "Output"
-        '
         'tabLoadObjectPropertiesToDB
         '
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.Label20)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertyDelta)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtDeltaTsp)
+        Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.btnCheckDeltaTsp)
         Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertiesSIID)
         Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.Label17)
         Me.tabLoadObjectPropertiesToDB.Controls.Add(Me.txtLoadObjectPropertiesDB)
@@ -731,6 +722,22 @@ Partial Class frmTools
         Me.tabLoadObjectPropertiesToDB.TabIndex = 9
         Me.tabLoadObjectPropertiesToDB.Text = "Load Object Properties to DB"
         Me.tabLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
+        '
+        'txtDeltaTsp
+        '
+        Me.txtDeltaTsp.Location = New System.Drawing.Point(344, 23)
+        Me.txtDeltaTsp.Name = "txtDeltaTsp"
+        Me.txtDeltaTsp.Size = New System.Drawing.Size(185, 20)
+        Me.txtDeltaTsp.TabIndex = 25
+        '
+        'btnCheckDeltaTsp
+        '
+        Me.btnCheckDeltaTsp.Location = New System.Drawing.Point(344, 0)
+        Me.btnCheckDeltaTsp.Name = "btnCheckDeltaTsp"
+        Me.btnCheckDeltaTsp.Size = New System.Drawing.Size(93, 23)
+        Me.btnCheckDeltaTsp.TabIndex = 24
+        Me.btnCheckDeltaTsp.Text = "Get Delta Tsp"
+        Me.btnCheckDeltaTsp.UseVisualStyleBackColor = True
         '
         'txtLoadObjectPropertiesSIID
         '
@@ -784,12 +791,46 @@ Partial Class frmTools
         '
         'btnLoadObjectPropertiesToDB
         '
-        Me.btnLoadObjectPropertiesToDB.Location = New System.Drawing.Point(361, 34)
+        Me.btnLoadObjectPropertiesToDB.Location = New System.Drawing.Point(469, 49)
         Me.btnLoadObjectPropertiesToDB.Name = "btnLoadObjectPropertiesToDB"
         Me.btnLoadObjectPropertiesToDB.Size = New System.Drawing.Size(75, 39)
         Me.btnLoadObjectPropertiesToDB.TabIndex = 17
         Me.btnLoadObjectPropertiesToDB.Text = "Extract Repo"
         Me.btnLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
+        '
+        'rtbOutput
+        '
+        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
+        Me.rtbOutput.Name = "rtbOutput"
+        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
+        Me.rtbOutput.TabIndex = 11
+        Me.rtbOutput.Text = ""
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(8, 274)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(39, 13)
+        Me.Label8.TabIndex = 12
+        Me.Label8.Text = "Output"
+        '
+        'txtLoadObjectPropertyDelta
+        '
+        Me.txtLoadObjectPropertyDelta.Location = New System.Drawing.Point(344, 65)
+        Me.txtLoadObjectPropertyDelta.Name = "txtLoadObjectPropertyDelta"
+        Me.txtLoadObjectPropertyDelta.Size = New System.Drawing.Size(100, 20)
+        Me.txtLoadObjectPropertyDelta.TabIndex = 26
+        Me.txtLoadObjectPropertyDelta.Text = "1"
+        '
+        'Label20
+        '
+        Me.Label20.AutoSize = True
+        Me.Label20.Location = New System.Drawing.Point(344, 49)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(108, 13)
+        Me.Label20.TabIndex = 27
+        Me.Label20.Text = "Deltas (1=Yes, 0=No)"
         '
         'frmTools
         '
@@ -913,4 +954,8 @@ Partial Class frmTools
     Friend WithEvents txtLoadObjectPropertiesServer As TextBox
     Friend WithEvents Label19 As Label
     Friend WithEvents btnLoadObjectPropertiesToDB As Button
+    Friend WithEvents txtDeltaTsp As TextBox
+    Friend WithEvents btnCheckDeltaTsp As Button
+    Friend WithEvents Label20 As Label
+    Friend WithEvents txtLoadObjectPropertyDelta As TextBox
 End Class
