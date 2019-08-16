@@ -1414,7 +1414,7 @@ Public Class frmTools
         strQuery = strQuery & "               SI_ID, ClassName, PropertyName "
         strQuery = strQuery & "              ,PropertyValueInstanceNumber, PropertyValue "
         strQuery = strQuery & "          ) "
-        If blnDelta Then
+        If Not blnDelta Then
             strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
             strQuery = strQuery & "THEN DELETE "
         End If
