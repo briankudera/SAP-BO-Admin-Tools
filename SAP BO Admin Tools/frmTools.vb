@@ -804,7 +804,7 @@ Public Class frmTools
 
     Private Sub BuildLoadToDatabaseObjectPropertyStgString(ByRef myDT As DataTable, strId As String, strClassName As String, strPropertyName As String, intPropertyValueInstanceNumber As String, strPropertyValue As String)
 
-        If strPropertyValue <> "" And strPropertyValue <> "SI_ID" And strPropertyValue <> "System.__ComObject" And strPropertyValue <> "SI_INDEX" Then
+        If strPropertyValue <> "" And strPropertyValue <> "SI_ID" And strPropertyValue <> "System.__ComObject" And InStr(1, strPropertyName, "SI_INDEX") = 0 Then
             ' Add some new rows to the collection.
             Dim row As DataRow
             row = myDT.NewRow()
@@ -1064,16 +1064,16 @@ Public Class frmTools
 
                 intDaysSpan = (Date.Now - dtEnd).Days
                 If intDaysSpan >= 360 Then
-                    intRange = 180
-                ElseIf intDaysSpan >= 180 Then
-                    intRange = 60
+                    intRange = 240
+                ElseIf intDaysSpan >= 240 Then
+                    intRange = 120
                 ElseIf intDaysSpan >= 120 Then
-                    intRange = 15
-                ElseIf intDaysSpan >= 60 Then
-                    intRange = 10
+                    intRange = 30
                 ElseIf intDaysSpan >= 30 Then
-                    intRange = 5
+                    intRange = 10
                 ElseIf intDaysSpan >= 10 Then
+                    intRange = 5
+                ElseIf intDaysSpan >= 5 Then
                     intRange = 1
                 Else
                     intRange = 0
