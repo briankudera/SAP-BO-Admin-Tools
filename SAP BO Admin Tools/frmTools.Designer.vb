@@ -90,6 +90,8 @@ Partial Class frmTools
         Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
         Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
         Me.tabLoadObjectPropertiesToDB = New System.Windows.Forms.TabPage()
+        Me.Label20 = New System.Windows.Forms.Label()
+        Me.txtLoadObjectPropertyDelta = New System.Windows.Forms.TextBox()
         Me.txtDeltaTsp = New System.Windows.Forms.TextBox()
         Me.btnCheckDeltaTsp = New System.Windows.Forms.Button()
         Me.txtLoadObjectPropertiesSIID = New System.Windows.Forms.TextBox()
@@ -101,8 +103,6 @@ Partial Class frmTools
         Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.txtLoadObjectPropertyDelta = New System.Windows.Forms.TextBox()
-        Me.Label20 = New System.Windows.Forms.Label()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -173,7 +173,6 @@ Partial Class frmTools
         Me.txtCMSUserPassword.PasswordChar = Global.Microsoft.VisualBasic.ChrW(42)
         Me.txtCMSUserPassword.Size = New System.Drawing.Size(220, 20)
         Me.txtCMSUserPassword.TabIndex = 3
-        Me.txtCMSUserPassword.Text = "Administrator"
         '
         'Label1
         '
@@ -723,6 +722,23 @@ Partial Class frmTools
         Me.tabLoadObjectPropertiesToDB.Text = "Load Object Properties to DB"
         Me.tabLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
         '
+        'Label20
+        '
+        Me.Label20.AutoSize = True
+        Me.Label20.Location = New System.Drawing.Point(344, 49)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(108, 13)
+        Me.Label20.TabIndex = 27
+        Me.Label20.Text = "Deltas (1=Yes, 0=No)"
+        '
+        'txtLoadObjectPropertyDelta
+        '
+        Me.txtLoadObjectPropertyDelta.Location = New System.Drawing.Point(344, 65)
+        Me.txtLoadObjectPropertyDelta.Name = "txtLoadObjectPropertyDelta"
+        Me.txtLoadObjectPropertyDelta.Size = New System.Drawing.Size(100, 20)
+        Me.txtLoadObjectPropertyDelta.TabIndex = 26
+        Me.txtLoadObjectPropertyDelta.Text = "0"
+        '
         'txtDeltaTsp
         '
         Me.txtDeltaTsp.Location = New System.Drawing.Point(344, 23)
@@ -745,6 +761,7 @@ Partial Class frmTools
         Me.txtLoadObjectPropertiesSIID.Name = "txtLoadObjectPropertiesSIID"
         Me.txtLoadObjectPropertiesSIID.Size = New System.Drawing.Size(220, 20)
         Me.txtLoadObjectPropertiesSIID.TabIndex = 23
+        Me.txtLoadObjectPropertiesSIID.Text = "22292"
         '
         'Label17
         '
@@ -778,7 +795,7 @@ Partial Class frmTools
         Me.txtLoadObjectPropertiesServer.Name = "txtLoadObjectPropertiesServer"
         Me.txtLoadObjectPropertiesServer.Size = New System.Drawing.Size(220, 20)
         Me.txtLoadObjectPropertiesServer.TabIndex = 19
-        Me.txtLoadObjectPropertiesServer.Text = "SQLAG02"
+        Me.txtLoadObjectPropertiesServer.Text = "SQLDEV"
         '
         'Label19
         '
@@ -814,23 +831,6 @@ Partial Class frmTools
         Me.Label8.Size = New System.Drawing.Size(39, 13)
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
-        '
-        'txtLoadObjectPropertyDelta
-        '
-        Me.txtLoadObjectPropertyDelta.Location = New System.Drawing.Point(344, 65)
-        Me.txtLoadObjectPropertyDelta.Name = "txtLoadObjectPropertyDelta"
-        Me.txtLoadObjectPropertyDelta.Size = New System.Drawing.Size(100, 20)
-        Me.txtLoadObjectPropertyDelta.TabIndex = 26
-        Me.txtLoadObjectPropertyDelta.Text = "1"
-        '
-        'Label20
-        '
-        Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(344, 49)
-        Me.Label20.Name = "Label20"
-        Me.Label20.Size = New System.Drawing.Size(108, 13)
-        Me.Label20.TabIndex = 27
-        Me.Label20.Text = "Deltas (1=Yes, 0=No)"
         '
         'frmTools
         '
