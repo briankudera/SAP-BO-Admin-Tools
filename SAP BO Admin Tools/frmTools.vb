@@ -722,7 +722,7 @@ Public Class frmTools
                         & ") " _
                         & "With (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.DimSAPBOObjectProperty_History))")
 
-        ExecuteQuery("IF EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX01_DimSAPBOObjectProperty') CREATE UNIQUE INDEX IX01_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName,PropertyName)")
+        ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX01_DimSAPBOObjectProperty') CREATE UNIQUE INDEX IX01_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName,PropertyName)")
 
     End Sub
 
@@ -1003,6 +1003,7 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_LAST_RUN_TIME"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_LAST_SUCCESSFUL_INSTANCE_ID"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_NAME"
+        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_NEW_JOB_ID"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_NEXTRUNTIME"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULE_STATUS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_OWNER"
@@ -1102,67 +1103,6 @@ Public Class frmTools
         logger.Trace("GetBOObjectProperties: finished sub")
 
         MergeObjectPropertyList(blnDeltas)
-
-    End Sub
-
-    Private Sub SubGetBOObjectPropertiesForObject(myDataTableOfInfoObjects As DataTable, strSIID As String)
-
-        Dim strQuery As String
-        Dim strListOfColumnsToReturn As String
-        strListOfColumnsToReturn = ""
-        strListOfColumnsToReturn = strListOfColumnsToReturn + " SI_ID"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_CUID"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_CREATION_TIME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_DESCRIPTION"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_HAS_CHILDREN"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_INSTANCE"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_KIND"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_LAST_RUN_TIME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_LAST_SUCCESSFUL_INSTANCE_ID"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_NAME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_NEXTRUNTIME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULE_STATUS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_OWNER"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_OWNERID"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PARENT_FOLDER"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PARENTID"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_RECURRING"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SIZE"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_UPDATE_TS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_TYPE"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_STARTTIME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_ENDTIME"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_HOURS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_MINUTES"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_MONTHS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_NDAYS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_NTHDAY"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_RUN_ON_TEMPLATE"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_DESTINATIONS"
-        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_WEBI_PROMPTS"
-
-        Dim myInfoObjects As InfoObjects
-
-        strQuery = "SELECT " + strListOfColumnsToReturn + " FROM CI_INFOOBJECTS WHERE SI_ID = " + strSIID
-
-        logger.Trace("SubGetBOObjectPropertiesForObject: next step, open a session to BO.")
-        Me.NewBOSession()
-        logger.Trace("SubGetBOObjectPropertiesForObject:      finished step, open a session to BO.")
-
-        logger.Trace("SubGetBOObjectPropertiesForObject: next step, execute CMC query: " + strQuery)
-        Try
-            myInfoObjects = Me.boInfoStore.Query(strQuery)
-        Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in SubGetBOObjectProperties")
-            Exit Sub
-        End Try
-        logger.Trace("SubGetBOObjectPropertiesForObject:      finished executing CMC query")
-
-        ParseInfoObjectProperties(myInfoObjects, myDataTableOfInfoObjects)
-
-        Me.LogoffBOSession()
-        myInfoObjects.Dispose()
-        myInfoObjects = Nothing
 
     End Sub
 
@@ -1499,7 +1439,7 @@ Public Class frmTools
         cmdDeltaProcessing = CBool(txtLoadObjectPropertyDelta.Text.ToString)
 
         'GetBOObjects(False, cmdTargetDB, cmdTargetServer, cmdDeltaProcessing)
-        GetBOObjectProperties(False, cmdTargetDB, cmdTargetServer, cmdDeltaProcessing)
+        GetBOObjectProperties(False, cmdTargetDB, cmdTargetServer, cmdDeltaProcessing, Me.txtLoadObjectPropertiesSIID.Text.ToString())
     End Sub
 
     Private Function GetLoadObjectPropertiesDeltaTimestamp() As String
