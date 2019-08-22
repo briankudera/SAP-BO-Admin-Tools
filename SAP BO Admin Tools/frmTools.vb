@@ -804,7 +804,7 @@ Public Class frmTools
 
     Private Sub BuildLoadToDatabaseObjectPropertyStgString(ByRef myDT As DataTable, strId As String, strClassName As String, strPropertyName As String, intPropertyValueInstanceNumber As String, strPropertyValue As String)
 
-        If strPropertyValue <> "" And strPropertyValue <> "SI_ID" And strPropertyValue <> "System.__ComObject" And InStr(1, strPropertyName, "SI_INDEX") = 0 Then
+        If strPropertyValue <> "" And strPropertyValue <> "SI_ID" And strPropertyValue <> "System.__ComObject" And InStr(1, strPropertyName, "SI_INDEX") = 0 And InStr(1, strPropertyName, "SI_MULTIINTERVAL") = 0 And InStr(1, strPropertyName, "SI_DYNAMIC") = 0 And InStr(1, strPropertyName, "SI_INTERVAL") = 0 And InStr(1, strPropertyName, "SI_COMPLEX") = 0 And InStr(1, strPropertyName, "SI_DATAPROVIDERS") = 0 Then
             ' Add some new rows to the collection.
             Dim row As DataRow
             row = myDT.NewRow()
@@ -1023,6 +1023,7 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_INTERVAL_NTHDAY"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_RUN_ON_TEMPLATE"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_DESTINATIONS"
+        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_HAS_PROMPTS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_WEBI_PROMPTS"
 
         logger.Trace("GetBOObjectProperties: next step is to set SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
