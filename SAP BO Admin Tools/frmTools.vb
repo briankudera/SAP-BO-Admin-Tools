@@ -724,6 +724,8 @@ Public Class frmTools
 
         ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX01_DimSAPBOObjectProperty') CREATE UNIQUE INDEX IX01_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName,PropertyName)")
 
+        ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX02_DimSAPBOObjectProperty') CREATE INDEX IX02_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName)")
+
     End Sub
 
     Private Sub LoadUserToDatabaseStg(strID As String, strCUID As String, strName As String, strFullName As String, strDescription As String, strEmailAddress As String, strLastLogonTime As String, strDisabled As String)
