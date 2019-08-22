@@ -1014,6 +1014,7 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PARENTID"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_RECURRING"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SIZE"
+        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_STATUSINFO"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_UPDATE_TS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_SCHEDULE_TYPE"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_STARTTIME"
