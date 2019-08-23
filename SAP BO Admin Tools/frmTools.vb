@@ -991,7 +991,9 @@ Public Class frmTools
         logger.Trace("GetBOObjectProperties:begin sub, operating in delta mode=" + blnDeltas.ToString)
 
         Dim strQuery As String
+        Dim strSystemObjectQuery As String
         Dim strListOfColumnsToReturn As String
+        Dim strListOfSystemObjectColumnsToReturn As String
         Dim myDataTableOfInfoObjects As DataTable
 
         strListOfColumnsToReturn = ""
@@ -1030,6 +1032,14 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_HAS_PROMPTS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_WEBI_PROMPTS"
 
+        strListOfSystemObjectColumnsToReturn = ""
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + " SI_ID"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_CUID"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_CREATION_TIME"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_DESCRIPTION"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_KIND"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_NAME"
+
         logger.Trace("GetBOObjectProperties: next step is to set SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
         SetSQLConnection(strDatabaseName, strSQLServerName)
         logger.Trace("GetBOObjectProperties:      finished setting SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
@@ -1040,6 +1050,7 @@ Public Class frmTools
         logger.Trace("GetBOObjectProperties:      finished call CreateObjectTablePropertyRepo()")
 
         strQuery = "Select TOP 100000" + strListOfColumnsToReturn + " FROM CI_INFOOBJECTS WHERE SI_KIND != 'LCMJob'"
+        strSystemObjectQuery = "Select TOP 100000" + strListOfSystemObjectColumnsToReturn + " FROM CI_SYSTEMOBJECTS WHERE SI_KIND = 'Calendar'"
 
         If strSIID <> "" Then
             strQuery = strQuery + " AND SI_ID = " + strSIID
@@ -1050,8 +1061,10 @@ Public Class frmTools
         If blnDeltas Then
             Dim strLastUpdateTimestamp = GetLoadObjectPropertiesDeltaTimestamp()
             strQuery = strQuery + " AND SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "'"
+            strSystemObjectQuery = strSystemObjectQuery + " AND SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "'"
 
             SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strQuery, myDataTableOfInfoObjects)
+            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects)
 
             'If we are providing an object id, we don't need to loop through dates
         ElseIf strSIID <> "" Then
@@ -1099,6 +1112,9 @@ Public Class frmTools
                 dtBegin = dtEnd.AddDays(1)
 
             Loop While dtBegin < dtToday
+
+            'Full load of system objects query
+            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects)
 
         End If
 
