@@ -1064,7 +1064,7 @@ Public Class frmTools
             strSystemObjectQuery = strSystemObjectQuery + " AND SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "'"
 
             SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strQuery, myDataTableOfInfoObjects)
-            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects)
+            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects, "SystemProperties")
 
             'If we are providing an object id, we don't need to loop through dates
         ElseIf strSIID <> "" Then
@@ -1114,7 +1114,7 @@ Public Class frmTools
             Loop While dtBegin < dtToday
 
             'Full load of system objects query
-            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects)
+            SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strSystemObjectQuery, myDataTableOfInfoObjects, "SystemProperties")
 
         End If
 
@@ -1127,7 +1127,7 @@ Public Class frmTools
 
     End Sub
 
-    Private Sub ParseInfoObjectProperties(myInfoObjects As InfoObjects, myDataTableOfInfoObjects As DataTable)
+    Private Sub ParseInfoObjectProperties(myInfoObjects As InfoObjects, myDataTableOfInfoObjects As DataTable, Optional strClassName As String = "")
 
         Dim strClass As String
         Dim strId As String
@@ -1163,7 +1163,10 @@ Public Class frmTools
                     strId = myInfoInfoProperties.Item("SI_ID").Value.ToString()
 
                     If myInfoInfoProperties.Count > 0 Then
-                        strClass = "Properties"
+                        If strClassName = "" Then
+                            strClass = "Properties"
+                        End If
+
                         For iProp1 = 1 To myInfoInfoProperties.Count
 
                             strProperty1 = myInfoInfoProperties(iProp1).Name.ToString()
@@ -1376,7 +1379,7 @@ Public Class frmTools
         End If
     End Sub
 
-    Private Sub SubGetBOObjectProperties(strDatabaseName As String, strSQLServerName As String, strQuery As String, myDataTableOfInfoObjects As DataTable)
+    Private Sub SubGetBOObjectProperties(strDatabaseName As String, strSQLServerName As String, strQuery As String, myDataTableOfInfoObjects As DataTable, Optional strClassName As String = "")
 
         Dim myInfoObjects As InfoObjects
         Me.NewBOSession()
@@ -1390,7 +1393,7 @@ Public Class frmTools
         End Try
         logger.Trace("SubGetBOObjectPropertiesForObject:      finished executing CMC query")
 
-        ParseInfoObjectProperties(myInfoObjects, myDataTableOfInfoObjects)
+        ParseInfoObjectProperties(myInfoObjects, myDataTableOfInfoObjects, strClassName)
 
         Me.LogoffBOSession()
         myInfoObjects.Dispose()
