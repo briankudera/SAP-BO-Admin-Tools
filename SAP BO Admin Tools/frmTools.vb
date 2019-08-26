@@ -72,7 +72,7 @@ Public Class frmTools
         }
         config.AddTarget(fileTarget)
 
-        config.AddRuleForOneLevel(LogLevel.Trace, fileTarget)
+        config.AddRuleForOneLevel(LogLevel.Error, fileTarget)
 
         LogManager.Configuration = config
 
@@ -90,19 +90,23 @@ Public Class frmTools
 
 
         Try
-            cmdCommandLine = arguments(0)
-            cmdAction = arguments(1)
-            cmdCMSServer = arguments(2)
-            cmdCMSUser = arguments(3)
-            cmdCMSUserPassword = arguments(4)
-            cmdCMSAuthentication = arguments(5)
-            cmdTargetServer = arguments(6)
-            cmdTargetDB = arguments(7)
-            cmdDeltaProcessing = arguments(8)
-            cmdQuery = arguments(9)
-            cmdSIID = arguments(10)
+            If arguments.Count = 9 Then
+                cmdCommandLine = arguments(0)
+                cmdAction = arguments(1)
+                cmdCMSServer = arguments(2)
+                cmdCMSUser = arguments(3)
+                cmdCMSUserPassword = arguments(4)
+                cmdCMSAuthentication = arguments(5)
+                cmdTargetServer = arguments(6)
+                cmdTargetDB = arguments(7)
+                cmdDeltaProcessing = arguments(8)
+            ElseIf arguments.Count = 11 Then
+
+                cmdQuery = arguments(9)
+                cmdSIID = arguments(10)
+            End If
         Catch ex As Exception
-            logger.Error(ex, "Program called via console but error parsing args!")
+            logger.Error(ex, "Program called via console but error parsing args! Delta processing arg: " & cmdDeltaProcessing)
         End Try
 
         logger.Trace("Program called via console. Program: " + cmdAction)
@@ -635,7 +639,7 @@ Public Class frmTools
 
         logger.Debug("CreateUserTableForRepo: Begin to create table if not exists: DimSAPBOUser_Stg")
         ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOUser_Stg' and xtype='U') " _
+                        & "(select 1 from sys.objects where name='DimSAPBOUser_Stg' and type='U') " _
                         & "create table DimSAPBOUser_Stg (" _
                         & "    SI_ID int not null primary key" _
                         & "   ,SI_CUID varchar(64) Not null" _
@@ -659,7 +663,7 @@ Public Class frmTools
     Private Sub CreateObjectTableForRepo()
 
         ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObject_Stg' and xtype='U') " _
+                        & "(select 1 from sys.objects where name='DimSAPBOObject_Stg' and type='U') " _
                         & "create table DimSAPBOObject_Stg (" _
                         & "    SI_ID int not null primary key" _
                         & "   ,SI_CUID varchar(64) not null" _
@@ -690,9 +694,9 @@ Public Class frmTools
     Private Sub CreateObjectTablePropertyRepoStage()
 
         ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObjectProperty_Stg' and xtype='U') " _
+                        & "(select 1 from sys.objects where name='DimSAPBOObjectProperty_Stg' and type='U') " _
                         & "create table DimSAPBOObjectProperty_Stg (" _
-                        & "    SI_ID int not null" _
+                        & "    SI_ID BIGINT not null" _
                         & "   ,ClassName varchar(64) not null" _
                         & "   ,PropertyName varchar(255) not null" _
                         & "   ,PropertyValueInstanceNumber int null" _
@@ -706,12 +710,14 @@ Public Class frmTools
 
     Private Sub CreateObjectTablePropertyRepo()
 
+        Dim strQuery As String
+
         ExecuteQuery("if Not exists " _
-                        & "(select 1 from sysobjects where name='DimSAPBOObjectProperty' and xtype='U') " _
+                        & "(select 1 from sys.objects where name='DimSAPBOObjectProperty' and type='U') " _
                         & "CREATE TABLE [dbo].[DimSAPBOObjectProperty]" _
                         & "(" _
-                        & "[ObjectPropertyKey] Int Not NULL IDENTITY(1, 1) PRIMARY KEY," _
-                        & "[SI_ID] [Int] Not NULL," _
+                        & "[ObjectPropertyKey] BIGINT Not NULL IDENTITY(1, 1) PRIMARY KEY," _
+                        & "[SI_ID] [BIGINT] Not NULL," _
                         & "[ClassName] [varchar](64) COLLATE SQL_Latin1_General_CP1_CI_AS Not NULL," _
                         & "[PropertyName] [varchar](255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL," _
                         & "[PropertyValueInstanceNumber] [Int] NULL," _
@@ -725,6 +731,96 @@ Public Class frmTools
         ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX01_DimSAPBOObjectProperty') CREATE UNIQUE INDEX IX01_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName,PropertyName)")
 
         ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.DimSAPBOObjectProperty') AND name='IX02_DimSAPBOObjectProperty') CREATE INDEX IX02_DimSAPBOObjectProperty On DimSAPBOObjectProperty (SI_ID,ClassName)")
+
+        ExecuteQuery("IF NOT EXISTS (SELECT 'foo' FROM sys.schemas WHERE name = 'BI') EXEC('CREATE SCHEMA [BI]')")
+
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_PromptName') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_PromptName] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "PromptNum Int Not NULL, "
+        strQuery = strQuery & "PromptName VARCHAR(2000) Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE(), "
+        strQuery = strQuery & "PRIMARY KEY(SI_ID, PromptNum) "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_PromptValue') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_PromptValue] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "PromptNum Int Not NULL, "
+        strQuery = strQuery & "PromptValue VARCHAR(400) Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE(), "
+        strQuery = strQuery & "PRIMARY KEY(SI_ID, PromptNum, PromptValue) "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_InstanceLastRunDateTime') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_InstanceLastRunDateTime] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL PRIMARY KEY, "
+        strQuery = strQuery & "Parent_SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "InstanceLastRunDateTime DateTime Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE() "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_ListOfEmailBcc') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_ListOfEmailBcc] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "EmailAddressBcc VARCHAR(200) Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE(), "
+        strQuery = strQuery & "PRIMARY KEY(SI_ID, EmailAddressBcc) "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_ListOfEmailCc') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_ListOfEmailCc] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "EmailAddressCc VARCHAR(200) Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE(), "
+        strQuery = strQuery & "PRIMARY KEY(SI_ID, EmailAddressCc) "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_ListOfEmailTo') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_ListOfEmailTo] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL, "
+        strQuery = strQuery & "EmailAddressTo VARCHAR(800) Not NULL, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE(), "
+        strQuery = strQuery & "PRIMARY KEY(SI_ID, EmailAddressTo) "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_NonRecurring_ListOfIDs') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_NonRecurring_ListOfIDs] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL PRIMARY KEY, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE() "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "If Not exists(select 1 from sys.objects where object_id = object_id('BI.DimBOObject_ScheduledReport_Recurring_ListOfIDs') and type='U') "
+        strQuery = strQuery & "CREATE TABLE [BI].[DimBOObject_ScheduledReport_Recurring_ListOfIDs] "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "SI_ID BIGINT Not NULL PRIMARY KEY, "
+        strQuery = strQuery & "RecordInsertTimestamp DATETIME2(7) Not NULL DEFAULT GETDATE() "
+        strQuery = strQuery & ") "
+        ExecuteQuery(strQuery)
+
 
     End Sub
 
@@ -828,7 +924,7 @@ Public Class frmTools
             Using bulkCopy As SqlBulkCopy =
               New SqlBulkCopy(conSQLConn)
                 bulkCopy.DestinationTableName = "dbo.DimSAPBOObjectProperty_Stg"
-
+                bulkCopy.BulkCopyTimeout = 3600
                 Try
                     ' Write from the source to the destination.
                     bulkCopy.WriteToServer(myDataTableOfInfoObjects)
@@ -856,6 +952,7 @@ Public Class frmTools
     Private Sub ExecuteQuery(strQuery As String)
 
         Dim cmdSQLCmd As New SqlCommand(strQuery, conSQLConn)
+        cmdSQLCmd.CommandTimeout = 300
 
         Try
             conSQLConn.Open()
@@ -863,7 +960,7 @@ Public Class frmTools
             cmdSQLCmd.ExecuteNonQuery()
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in ExecuteQuery")
+            logger.[Error](ex, "ow noos! Error in ExecuteQuery: " & strQuery)
             Exit Try
         End Try
 
@@ -1001,6 +1098,7 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_CUID"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_CREATION_TIME"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_DESCRIPTION"
+        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_ENDTIME"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_HAS_CHILDREN"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_INSTANCE"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_KIND"
@@ -1060,7 +1158,7 @@ Public Class frmTools
 
         If blnDeltas Then
             Dim strLastUpdateTimestamp = GetLoadObjectPropertiesDeltaTimestamp()
-            strQuery = strQuery + " AND SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "'"
+            strQuery = strQuery + " AND (SI_RECURRING=1 OR SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "')"
             strSystemObjectQuery = strSystemObjectQuery + " AND SI_UPDATE_TS >= '" + strLastUpdateTimestamp + "'"
 
             SubGetBOObjectProperties(strDatabaseName, strSQLServerName, strQuery, myDataTableOfInfoObjects)
@@ -1165,6 +1263,8 @@ Public Class frmTools
                     If myInfoInfoProperties.Count > 0 Then
                         If strClassName = "" Then
                             strClass = "Properties"
+                        Else
+                            strClass = strClassName
                         End If
 
                         For iProp1 = 1 To myInfoInfoProperties.Count
@@ -1620,8 +1720,271 @@ Public Class frmTools
             strQuery = strQuery & "THEN DELETE "
         End If
         strQuery = strQuery & ";"
-
         ExecuteQuery(strQuery)
 
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_NonRecurring_ListOfIDs tgt "
+        strQuery = strQuery & "Using  "
+        strQuery = strQuery & "     ( "
+        strQuery = strQuery & "          SELECT "
+        strQuery = strQuery & "               DISTINCT "
+        strQuery = strQuery & "                ppt.SI_ID "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty ppt "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "               INNER Join dbo.DimSAPBOObjectProperty ins "
+        strQuery = strQuery & "               On ppt.SI_ID = ins.SI_ID "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                ppt.ClassName = 'Properties' "
+        strQuery = strQuery & "               And ppt.PropertyName = 'SI_INSTANCE' "
+        strQuery = strQuery & "               And ppt.PropertyValue = 'true' "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "               And ins.ClassName = 'Properties' "
+        strQuery = strQuery & "               And ins.PropertyName = 'SI_RECURRING' "
+        strQuery = strQuery & "               And ins.PropertyValue = 'false' "
+        strQuery = strQuery & "     ) src "
+        strQuery = strQuery & "On ( tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_ListOfEmailBcc tgt "
+        strQuery = strQuery & "Using "
+        strQuery = strQuery & "    ( "
+        strQuery = strQuery & "          SELECT DISTINCT "
+        strQuery = strQuery & "               pptEmail.SI_ID "
+        strQuery = strQuery & "              ,CAST(pptEmail.PropertyValue AS VARCHAR(200)) AS EmailAddressBcc "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty pptEmail "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                pptEmail.ClassName = 'Scheduling' "
+        strQuery = strQuery & "               And pptEmail.PropertyName Like 'SI_DESTINATIONS.1.SI_DEST_SCHEDULEOPTIONS.SI_MAIL_BCC.%' "
+        strQuery = strQuery & " And pptEmail.PropertyName Not Like '%.SI_TOTAL' "
+        strQuery = strQuery & "    ) src "
+        strQuery = strQuery & "On ( tgt.EmailAddressBcc = src.EmailAddressBcc And tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID, EmailAddressBcc ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, EmailAddressBcc "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_Recurring_ListOfIDs tgt "
+        strQuery = strQuery & "Using "
+        strQuery = strQuery & "    ( "
+        strQuery = strQuery & "          SELECT "
+        strQuery = strQuery & "               DISTINCT "
+        strQuery = strQuery & "                ppt.SI_ID "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty ppt "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                ppt.ClassName = 'Properties' "
+        strQuery = strQuery & "               And ( "
+        strQuery = strQuery & "                    (ppt.PropertyName = 'SI_RECURRING' "
+        strQuery = strQuery & "                     And ppt.PropertyValue = 'True') "
+        strQuery = strQuery & "                     Or "
+        strQuery = strQuery & "                    (ppt.PropertyName = 'SI_SCHEDULE_STATUS' "
+        strQuery = strQuery & "                     And ppt.PropertyValue = '9') "
+        strQuery = strQuery & "                    ) "
+        strQuery = strQuery & "    ) src "
+        strQuery = strQuery & "On ( tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_PromptName tgt "
+        strQuery = strQuery & "Using  "
+        strQuery = strQuery & "    ( "
+        strQuery = strQuery & "          SELECT "
+        strQuery = strQuery & "               promptName.SI_ID "
+        strQuery = strQuery & "              ,SUBSTRING(promptName.PropertyName,  17, CHARINDEX('.',SUBSTRING(promptName.PropertyName,  17, 100))-1) AS PromptNum "
+        strQuery = strQuery & "              ,promptName.PropertyValue AS PromptName "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty promptName "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                promptName.ClassName = 'Processing' "
+        strQuery = strQuery & " And promptName.PropertyName Like 'SI_WEBI_PROMPTS%' "
+        strQuery = strQuery & "               And promptName.PropertyName Like '%SI_NAME' "
+        strQuery = strQuery & " And promptName.PropertyName Not Like '%SI_TOTAL' "
+        strQuery = strQuery & "    ) src "
+        strQuery = strQuery & "On ( tgt.PromptNum = src.PromptNum And tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN MATCHED And ( NULLIF(src.PromptName, tgt.PromptName) Is Not NULL "
+        strQuery = strQuery & " Or NULLIF(tgt.PromptName, src.PromptName) Is Not NULL ) "
+        strQuery = strQuery & "THEN UPDATE SET "
+        strQuery = strQuery & "          PromptName = src.PromptName "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID, PromptNum, PromptName ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, PromptNum, PromptName "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_PromptValue tgt "
+        strQuery = strQuery & "Using "
+        strQuery = strQuery & "     ( "
+        strQuery = strQuery & "          SELECT "
+        strQuery = strQuery & "               DISTINCT "
+        strQuery = strQuery & "                promptValues.SI_ID "
+        strQuery = strQuery & "              ,CAST(SUBSTRING(promptValues.PropertyName,  17, CHARINDEX('.',SUBSTRING(promptValues.PropertyName,  17, 100))-1) AS INT) AS PromptNum "
+        strQuery = strQuery & "              ,CAST(promptValues.PropertyValue AS VARCHAR(400)) AS PromptValue "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty promptValues "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                promptValues.ClassName = 'Processing' "
+        strQuery = strQuery & "               And promptValues.ClassName = 'Processing' "
+        strQuery = strQuery & " And promptValues.PropertyName Like '%SI_VALUES%' "
+        strQuery = strQuery & "               And promptValues.PropertyName Not Like '%SI_TOTAL' "
+        strQuery = strQuery & "     ) src "
+        strQuery = strQuery & "On ( tgt.PromptNum = src.PromptNum "
+        strQuery = strQuery & " And tgt.PromptValue = src.PromptValue "
+        strQuery = strQuery & "     And tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "(SI_ID, PromptNum, PromptValue) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "( "
+        strQuery = strQuery & "               SI_ID, PromptNum, PromptValue "
+        strQuery = strQuery & ") "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_ListOfEmailTo tgt "
+        strQuery = strQuery & "Using " 
+        strQuery = strQuery & "     ( "
+        strQuery = strQuery & "          SELECT DISTINCT "
+        strQuery = strQuery & "               pptEmail.SI_ID "
+        strQuery = strQuery & "              ,CAST(pptEmail.PropertyValue AS VARCHAR(800)) AS EmailAddressTo "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty pptEmail "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                pptEmail.ClassName = 'Scheduling' "
+        strQuery = strQuery & "               And pptEmail.PropertyName Like 'SI_DESTINATIONS.1.SI_DEST_SCHEDULEOPTIONS.SI_MAIL_ADDRESSES.%' "
+        strQuery = strQuery & " And pptEmail.PropertyName Not Like '%.SI_TOTAL' "
+        strQuery = strQuery & "     ) src "
+        strQuery = strQuery & "On ( tgt.EmailAddressTo = src.EmailAddressTo And tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID, EmailAddressTo ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, EmailAddressTo "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_ListOfEmailCc tgt "
+        strQuery = strQuery & "Using  "
+        strQuery = strQuery & "    ( "
+        strQuery = strQuery & "          SELECT DISTINCT "
+        strQuery = strQuery & "               pptEmail.SI_ID "
+        strQuery = strQuery & "              ,CAST(pptEmail.PropertyValue AS VARCHAR(200)) AS EmailAddressCc "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty pptEmail "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                pptEmail.ClassName = 'Scheduling' "
+        strQuery = strQuery & "               And pptEmail.PropertyName Like 'SI_DESTINATIONS.1.SI_DEST_SCHEDULEOPTIONS.SI_MAIL_CC.%' "
+        strQuery = strQuery & " And pptEmail.PropertyName Not Like '%.SI_TOTAL' "
+        strQuery = strQuery & "    ) src "
+        strQuery = strQuery & "On ( tgt.EmailAddressCc = src.EmailAddressCc And tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID, EmailAddressCc ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, EmailAddressCc "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+        strQuery = ""
+        strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_InstanceLastRunDateTime tgt "
+        strQuery = strQuery & "Using  "
+        strQuery = strQuery & "     ( "
+        strQuery = strQuery & "          SELECT "
+        strQuery = strQuery & "               pptScheduleEndTime.SI_ID "
+        strQuery = strQuery & "              ,CAST(pptParentInstance.PropertyValue AS BIGINT) as Parent_SI_ID "
+        strQuery = strQuery & "              ,CONVERT(DATETIME, pptScheduleEndTime.PropertyValue,121) AS InstanceLastRunDateTime "
+        strQuery = strQuery & "          FROM "
+        strQuery = strQuery & "                dbo.DimSAPBOObjectProperty pptScheduleEndTime "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "               INNER Join dbo.DimSAPBOObjectProperty pptParentInstance "
+        strQuery = strQuery & "               On pptScheduleEndTime.SI_ID = pptParentInstance.SI_ID "
+        strQuery = strQuery & "               And pptParentInstance.ClassName = 'Properties' "
+        strQuery = strQuery & "               And pptParentInstance.PropertyName = 'SI_NEW_JOB_ID' "
+        strQuery = strQuery & "               And pptParentInstance.SI_ID <> pptParentInstance.PropertyValue "
+        strQuery = strQuery & "          WHERE "
+        strQuery = strQuery & "                pptScheduleEndTime.ClassName = 'Properties' "
+        strQuery = strQuery & "                And pptScheduleEndTime.PropertyName = 'SI_ENDTIME' "
+        strQuery = strQuery & "     ) src "
+        strQuery = strQuery & "On ( tgt.SI_ID = src.SI_ID ) "
+        strQuery = strQuery & " "
+        strQuery = strQuery & "WHEN MATCHED "
+        strQuery = strQuery & "                 And "
+        strQuery = strQuery & "(NULLIF(src.Parent_SI_ID, tgt.Parent_SI_ID) Is Not NULL "
+        strQuery = strQuery & "                        Or NULLIF(tgt.Parent_SI_ID, src.Parent_SI_ID) Is Not NULL "
+        strQuery = strQuery & " Or NULLIF(src.InstanceLastRunDateTime, tgt.InstanceLastRunDateTime) Is Not NULL "
+        strQuery = strQuery & "                        Or NULLIF(tgt.InstanceLastRunDateTime, src.InstanceLastRunDateTime) Is Not NULL ) "
+        strQuery = strQuery & "THEN UPDATE SET "
+        strQuery = strQuery & "          Parent_SI_ID = src.Parent_SI_ID "
+        strQuery = strQuery & "         ,InstanceLastRunDateTime = src.InstanceLastRunDateTime "
+        strQuery = strQuery & "WHEN Not MATCHED BY TARGET  "
+        strQuery = strQuery & "THEN INSERT "
+        strQuery = strQuery & "          ( SI_ID "
+        strQuery = strQuery & "           ,Parent_SI_ID "
+        strQuery = strQuery & "           ,InstanceLastRunDateTime ) "
+        strQuery = strQuery & "     VALUES "
+        strQuery = strQuery & "          ( "
+        strQuery = strQuery & "               SI_ID, Parent_SI_ID, InstanceLastRunDateTime "
+        strQuery = strQuery & "          ) "
+        strQuery = strQuery & "WHEN Not MATCHED BY SOURCE "
+        strQuery = strQuery & "THEN DELETE "
+        strQuery = strQuery & "; "
+        ExecuteQuery(strQuery)
+
+
     End Sub
+
+
+
+
 End Class
