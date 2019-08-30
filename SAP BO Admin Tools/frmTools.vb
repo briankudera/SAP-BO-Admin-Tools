@@ -4,7 +4,7 @@ Imports CrystalDecisions.Enterprise.Desktop
 Imports NLog
 Imports NLog.Targets
 Imports NLog.Config
-
+Imports System.IO
 
 Public Class frmTools
 
@@ -1884,7 +1884,7 @@ Public Class frmTools
 
         strQuery = ""
         strQuery = strQuery & "MERGE BI.DimBOObject_ScheduledReport_ListOfEmailTo tgt "
-        strQuery = strQuery & "Using " 
+        strQuery = strQuery & "Using "
         strQuery = strQuery & "     ( "
         strQuery = strQuery & "          SELECT DISTINCT "
         strQuery = strQuery & "               pptEmail.SI_ID "
@@ -1984,7 +1984,66 @@ Public Class frmTools
 
     End Sub
 
+    'Sub CleanRepoOrphans()
 
+    '    Dim Run_In_Test_Mode As Boolean = True
+    '    Dim pathToInputFRS As String = "\\msp-fs\bi-filestore\Input"
+    '    Dim pathToOutputFRS As String = "\\msp-fs\bi-filestore\Output"
+    '    Dim username As String = "Administrator"
+    '    Dim password As String = "Password1"
+    '    Dim cmsname As String = "localhost"
+    '    Dim authType As String = "secEnterprise"
+    '    Me.NewBOSession()
 
+    '    CheckAndDelete(Run_In_Test_Mode, pathToInputFRS, "Input")
+    '    CheckAndDelete(Run_In_Test_Mode, pathToOutputFRS, "Output")
+
+    '    Me.LogoffBOSession()
+
+    'End Sub
+
+    'Private Sub CheckAndDelete(doDelete As Boolean, currentFolderPath As String, currentFolderName As String)
+    '    ' Loop through all the files / subdirectories in the current directory
+
+    '    Dim isOrphan As Boolean = False
+    '    Dim checkFiles As Boolean = False
+    '    Try
+    '        Dim currentDir As New DirectoryInfo(currentFolderPath)
+    '        Dim myListOfFiles As FileInfo() = currentDir.GetFiles("*", SearchOption.AllDirectories)
+    '        Dim myFile As FileInfo
+
+    '        For Each myFile In myListOfFiles
+    '            ' Have we already checked the files for this directory.
+
+    '            ' Since there are files - that means this is an infoobject and we need to check it.
+    '            ' The current directory name is the SI_ID of the infoobject, so query for that.
+    '            Dim strQuery As String
+    '            strQuery = "Select * from CI_INFOOBJECTS, CI_APPOBJECTS, CI_SYSTEMOBJECTS where SI_ID = " + currentFolderName
+    '            Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
+
+    '            ' Did we get a result
+    '            If (infoObjects.Count = 0) Then
+    '                    isOrphan = True
+    '                End If
+
+    '                ' If we verified that this is an orphan - delete the file
+    '                If (isOrphan = True) Then
+    '                writeToLog(("Deleting file " _
+    '                                + (File.getCanonicalPath + (" from Orphaned Infoobject with SI_ID " + currentFolderName))), fileToLogTo)
+    '                ' Are we in demo mode
+    '                If (doDelete = False) Then
+    '                    File.Delete()
+    '                End If
+
+    '            End If
+
+    '            End If
+
+    '        Next
+    '    Catch ex As Exception
+
+    '    End Try
+
+    'End Sub
 
 End Class
