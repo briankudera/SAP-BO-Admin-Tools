@@ -1129,14 +1129,20 @@ Public Class frmTools
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_SCHEDULEINFO.SI_DESTINATIONS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_HAS_PROMPTS"
         strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_WEBI_PROMPTS"
+        strListOfColumnsToReturn = strListOfColumnsToReturn + ",SI_PROCESSINFO.SI_WEBI_PROMPTS"
 
         strListOfSystemObjectColumnsToReturn = ""
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + " SI_ID"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_CUID"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_ALIASES"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_CREATION_TIME"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_DATA"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_DESCRIPTION"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_EMAIL_ADDRESS"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_KIND"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_LASTLOGONTIME"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_NAME"
+        strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_USERFULLNAME"
 
         logger.Trace("GetBOObjectProperties: next step is to set SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
         SetSQLConnection(strDatabaseName, strSQLServerName)
@@ -1148,7 +1154,7 @@ Public Class frmTools
         logger.Trace("GetBOObjectProperties:      finished call CreateObjectTablePropertyRepo()")
 
         strQuery = "Select TOP 100000" + strListOfColumnsToReturn + " FROM CI_INFOOBJECTS WHERE SI_KIND != 'LCMJob'"
-        strSystemObjectQuery = "Select TOP 100000" + strListOfSystemObjectColumnsToReturn + " FROM CI_SYSTEMOBJECTS WHERE SI_KIND = 'Calendar'"
+        strSystemObjectQuery = "Select TOP 100000" + strListOfSystemObjectColumnsToReturn + " FROM CI_SYSTEMOBJECTS WHERE SI_KIND IN ('Calendar','User')"
 
         If strSIID <> "" Then
             strQuery = strQuery + " AND SI_ID = " + strSIID
@@ -1246,7 +1252,7 @@ Public Class frmTools
 
         If myInfoObjects.Count > 0 Then
 
-            logger.Trace("SubGetBOObjectPropertiesForObject: found " + myInfoObjects.Count.ToString() + " InfoObjects to process.")
+            logger.Trace("ParseInfoObjectProperties: found " + myInfoObjects.Count.ToString() + " InfoObjects to process.")
 
             For iLoop = 1 To myInfoObjects.Count
 
@@ -1484,14 +1490,14 @@ Public Class frmTools
         Dim myInfoObjects As InfoObjects
         Me.NewBOSession()
 
-        logger.Trace("SubGetBOObjectPropertiesForObject: next step, execute CMC query: " + strQuery)
+        logger.Trace("SubGetBOObjectProperties: next step, execute CMC query: " + strQuery)
         Try
             myInfoObjects = Me.boInfoStore.Query(strQuery)
         Catch ex As Exception
             logger.[Error](ex, "ow noos! Error in SubGetBOObjectProperties")
             Exit Sub
         End Try
-        logger.Trace("SubGetBOObjectPropertiesForObject:      finished executing CMC query")
+        logger.Trace("SubGetBOObjectProperties:      finished executing CMC query")
 
         ParseInfoObjectProperties(myInfoObjects, myDataTableOfInfoObjects, strClassName)
 
