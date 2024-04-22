@@ -1,20 +1,15 @@
 ﻿Imports CrystalDecisions.Enterprise
 Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
-Imports NLog
-Imports NLog.Targets
-Imports NLog.Config
 Imports System.IO
+Imports log4net
+
+<Assembly: log4net.Config.XmlConfigurator(
+      ConfigFile:="Log4Net.config", Watch:=True)>
 
 Public Class frmTools
 
-    ' TODO: Insert code to perform custom authentication using the provided username and password 
-    ' (See http://go.microsoft.com/fwlink/?LinkId=35339).  
-    ' The custom principal can then be attached to the current thread's principal as follows: 
-    '     My.User.CurrentPrincipal = CustomPrincipal
-    ' where CustomPrincipal is the IPrincipal implementation used to perform authentication. 
-    ' Subsequently, My.User will return identity information encapsulated in the CustomPrincipal object
-    ' such as the username, display name, etc.
+    Private Shared ReadOnly logger As ILog = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
     Private boEnterpriseSession As EnterpriseSession
     Private boInfoStore As InfoStore
@@ -34,11 +29,14 @@ Public Class frmTools
     Private cmdQuery As String = ""
     Private cmdSIID As String = ""
 
-    Dim logger As Logger = LogManager.GetLogger("Example")
+
 
     Private Sub Tools_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        ConfigureLogger()
+        Config.XmlConfigurator.Configure()
+
+        Dim myFileVersionInfo = FileVersionInfo.GetVersionInfo(Application.ExecutablePath)
+        log4net.GlobalContext.Properties("VersionCode") = myFileVersionInfo.FileVersion.ToString
 
         Dim arguments As String() = Environment.GetCommandLineArgs()
 
@@ -52,37 +50,6 @@ Public Class frmTools
         If cboCMSAuthentication.Items.Count > 0 Then
             cboCMSAuthentication.SelectedIndex = 0    ' The first item has index 0 '
         End If
-
-    End Sub
-
-    Private Sub ConfigureLogger()
-
-        Dim config = New LoggingConfiguration()
-
-        'Dim consoleTarget = New ColoredConsoleTarget("target1") With {
-        '    .Layout = "${date:format=HH\:mm\:ss} ${level} ${message} ${exception}"
-        '}
-
-        'config.AddTarget(ConsoleTarget)
-        'config.AddRuleForAllLevels(consoleTarget)
-
-        Dim fileTarget = New FileTarget("target2") With {
-            .FileName = "${basedir}/SAPBOAdminToolsLog.txt",
-            .Layout = "${longdate} ${level} ${message}  ${exception}"
-        }
-        config.AddTarget(fileTarget)
-
-        config.AddRuleForOneLevel(LogLevel.Error, fileTarget)
-
-        LogManager.Configuration = config
-
-        'Example logger calls
-        'logger.Trace("trace log message")
-        'logger.Debug("debug log message")
-        'logger.Info("info log message")
-        'logger.Warn("warn log message")
-        'logger.[Error]("error log message")
-        'logger.Fatal("fatal log message")
 
     End Sub
 
@@ -106,19 +73,10 @@ Public Class frmTools
                 cmdSIID = arguments(10)
             End If
         Catch ex As Exception
-            logger.Error(ex, "Program called via console but error parsing args! Delta processing arg: " & cmdDeltaProcessing)
+            logger.Error("Program called via console but error parsing args! Delta processing arg: " & cmdDeltaProcessing, ex)
         End Try
 
-        logger.Trace("Program called via console. Program: " + cmdAction)
-        'logger.Trace("        Program args: cmd line: " + cmdCommandLine)
-        'logger.Trace("        Program args: action: " + cmdAction)
-        'logger.Trace("        Program args: CMS Server: " + cmdCMSServer)
-        'logger.Trace("        Program args: CMS User: " + cmdCMSUser)
-        'logger.Trace("        Program args: CMS Auth: " + cmdCMSAuthentication)
-        'logger.Trace("        Program args: Target Srv: " + cmdTargetServer)
-        'logger.Trace("        Program args: Target DB: " + cmdTargetDB)
-        'logger.Trace("        Program args: Deltas?: " + cmdDeltaProcessing.ToString())
-        'logger.Trace("        Program args: Query: " + cmdQuery)
+        logger.Info("Program called via console. Program: " + cmdAction)
 
         Try
             If cmdAction = "LoadUsersToDB" Then
@@ -130,7 +88,7 @@ Public Class frmTools
                 GetBOObjectProperties(False, cmdTargetDB, cmdTargetServer, cmdDeltaProcessing, cmdSIID)
             End If
         Catch ex As Exception
-            logger.Error(ex, "Program called via console but failed calling sub routine")
+            logger.Error("Program called via console but failed calling sub routine", ex)
         End Try
 
         Application.Exit()
@@ -168,7 +126,7 @@ Public Class frmTools
         Try
             Me.boEnterpriseSession = mgr.Logon(strUserName, strPassword, strCMSName, strAuthentication)
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error while establishing a BO Enterprise Session")
+            logger.Error("ow noos! Error while establishing a BO Enterprise Session", ex)
             Application.Exit()
         End Try
 
@@ -176,7 +134,7 @@ Public Class frmTools
             Me.boInfoStore = New InfoStore(Me.boEnterpriseSession.GetService("InfoStore"))
         Catch ex As Exception
 
-            logger.[Error](ex, "ow noos! Error while establishing a new InfoStore")
+            logger.Error("ow noos! Error while establishing a new InfoStore", ex)
             Application.Exit()
         End Try
 
@@ -566,7 +524,7 @@ Public Class frmTools
                         strDescription = current.Properties.Item("SI_DESCRIPTION").Value.ToString()
                         strEmailAddress = current.Properties.Item("SI_EMAIL_ADDRESS").Value.ToString()
                     Catch ex As Exception
-                        logger.[Error](ex, "ow noos! Error in GetBOUserList")
+                        logger.Error("ow noos! Error in GetBOUserList", ex)
                     End Try
 
                     'This property may not exist if the user has never logged on
@@ -593,7 +551,7 @@ Public Class frmTools
                 Loop
             Catch ex As Exception
 
-                logger.[Error](ex, "ow noos! Error in GetBOUserList")
+                logger.Error("ow noos! Error in GetBOUserList", ex)
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
@@ -651,7 +609,7 @@ Public Class frmTools
                         Loop
 
                     Catch ex As Exception
-                        logger.[Error](ex, "ow noos! Error in CheckIfUserIsDisabled")
+                        logger.Error("ow noos! Error in CheckIfUserIsDisabled", ex)
                     Finally
                         If TypeOf objUserEnumerator Is IDisposable Then
                             TryCast(objUserEnumerator, IDisposable).Dispose()
@@ -662,7 +620,7 @@ Public Class frmTools
                 Loop
 
             Catch ex As Exception
-                logger.[Error](ex, "ow noos! Error in CheckIfUserIsDisabled")
+                logger.Error("ow noos! Error in CheckIfUserIsDisabled", ex)
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
@@ -974,14 +932,14 @@ Public Class frmTools
                     bulkCopy.WriteToServer(myDataTableOfInfoObjects)
 
                 Catch ex As Exception
-                    logger.[Error](ex, "ow noos! Error in LoadToDatabaseObjectPropertyStgString")
+                    logger.Error("ow noos! Error in LoadToDatabaseObjectPropertyStgString", ex)
                 End Try
             End Using
 
             conSQLConn.Close()
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in LoadToDatabaseObjectPropertyStgString")
+            logger.Error("ow noos! Error in LoadToDatabaseObjectPropertyStgString", ex)
             Exit Try
         End Try
 
@@ -1004,7 +962,7 @@ Public Class frmTools
             cmdSQLCmd.ExecuteNonQuery()
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in ExecuteQuery: " & strQuery)
+            logger.Error("ow noos! Error in ExecuteQuery: " & strQuery, ex)
             Exit Try
         End Try
 
@@ -1115,7 +1073,7 @@ Public Class frmTools
 
                 Loop
             Catch ex As Exception
-                logger.[Error](ex, "ow noos! Error while querying and parsing Infostore for a list of objects")
+                logger.Error("ow noos! Error while querying and parsing Infostore for a list of objects", ex)
             Finally
                 If TypeOf enumerator Is IDisposable Then
                     TryCast(enumerator, IDisposable).Dispose()
@@ -1129,7 +1087,7 @@ Public Class frmTools
 
     Protected Sub GetBOObjectProperties(blnDisplay As Boolean, Optional strDatabaseName As String = "", Optional strSQLServerName As String = "", Optional blnDeltas As Boolean = 1, Optional strSIID As String = "")
 
-        logger.Trace("GetBOObjectProperties:begin sub, operating in delta mode=" + blnDeltas.ToString)
+        logger.Info("GetBOObjectProperties:begin sub, operating in delta mode=" + blnDeltas.ToString)
 
         Dim strQuery As String
         Dim strSystemObjectQuery As String
@@ -1188,14 +1146,14 @@ Public Class frmTools
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_NAME"
         strListOfSystemObjectColumnsToReturn = strListOfSystemObjectColumnsToReturn + ",SI_USERFULLNAME"
 
-        logger.Trace("GetBOObjectProperties: next step is to set SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
+        logger.Info("GetBOObjectProperties: next step is to set SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
         SetSQLConnection(strDatabaseName, strSQLServerName)
-        logger.Trace("GetBOObjectProperties:      finished setting SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
+        logger.Info("GetBOObjectProperties:      finished setting SQL Connection to: " + strDatabaseName + " on " + strSQLServerName)
 
-        logger.Trace("GetBOObjectProperties: next step is to call CreateObjectTablePropertyRepo()")
+        logger.Info("GetBOObjectProperties: next step is to call CreateObjectTablePropertyRepo()")
         CreateObjectTablePropertyRepo()
         CreateObjectTablePropertyRepoStage()
-        logger.Trace("GetBOObjectProperties:      finished call CreateObjectTablePropertyRepo()")
+        logger.Info("GetBOObjectProperties:      finished call CreateObjectTablePropertyRepo()")
 
         strQuery = "Select TOP 100000" + strListOfColumnsToReturn + " FROM CI_INFOOBJECTS WHERE SI_KIND != 'LCMJob'"
         strSystemObjectQuery = "Select TOP 100000" + strListOfSystemObjectColumnsToReturn + " FROM CI_SYSTEMOBJECTS WHERE SI_KIND IN ('Calendar','User')"
@@ -1269,7 +1227,7 @@ Public Class frmTools
         'Load what we got and move on
         LoadToDatabaseObjectPropertyStgString(myDataTableOfInfoObjects)
 
-        logger.Trace("GetBOObjectProperties: finished sub")
+        logger.Info("GetBOObjectProperties: finished sub")
 
         MergeObjectPropertyList(blnDeltas)
 
@@ -1278,7 +1236,7 @@ Public Class frmTools
     Private Sub ParseInfoObjectProperties(myInfoObjects As InfoObjects, myDataTableOfInfoObjects As DataTable, Optional strClassName As String = "")
 
         Dim strClass As String
-        Dim strId As String
+        Dim strId As String = ""
         Dim strProperty1 As String
         Dim strProperty2 As String
         Dim strProperty3 As String
@@ -1296,7 +1254,7 @@ Public Class frmTools
 
         If myInfoObjects.Count > 0 Then
 
-            logger.Trace("ParseInfoObjectProperties: found " + myInfoObjects.Count.ToString() + " InfoObjects to process.")
+            logger.Info("ParseInfoObjectProperties: found " + myInfoObjects.Count.ToString() + " InfoObjects to process.")
 
             For iLoop = 1 To myInfoObjects.Count
 
@@ -1534,14 +1492,14 @@ Public Class frmTools
         Dim myInfoObjects As InfoObjects
         Me.NewBOSession()
 
-        logger.Trace("SubGetBOObjectProperties: next step, execute CMC query: " + strQuery)
+        logger.Info("SubGetBOObjectProperties: next step, execute CMC query: " + strQuery)
         Try
             myInfoObjects = Me.boInfoStore.Query(strQuery)
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in SubGetBOObjectProperties")
+            logger.Error("ow noos! Error in SubGetBOObjectProperties", ex)
             Exit Sub
         End Try
-        logger.Trace("SubGetBOObjectProperties:      finished executing CMC query")
+        logger.Info("SubGetBOObjectProperties:      finished executing CMC query")
 
         ParseInfoObjectProperties(myInfoObjects, myDataTableOfInfoObjects, strClassName)
 
@@ -1630,7 +1588,7 @@ Public Class frmTools
             dtParmValue = CDate(cmdSQLCmd.ExecuteScalar())
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in GetLoadObjectPropertiesDeltaTimestamp")
+            logger.Error("ow noos! Error in GetLoadObjectPropertiesDeltaTimestamp", ex)
             Exit Try
         End Try
 
@@ -1653,7 +1611,7 @@ Public Class frmTools
             cmdSQLCmd.ExecuteNonQuery()
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp")
+            logger.Error("ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp", ex)
             Exit Try
         End Try
 
@@ -1682,7 +1640,7 @@ Public Class frmTools
             cmdSQLCmd.ExecuteNonQuery()
 
         Catch ex As Exception
-            logger.[Error](ex, "ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp")
+            logger.Error("ow noos! Error in SetLoadObjectPropertiesDeltaTimestamp", ex)
             Exit Try
         End Try
 
