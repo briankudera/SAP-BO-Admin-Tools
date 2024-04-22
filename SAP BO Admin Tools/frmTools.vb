@@ -202,21 +202,30 @@ Public Class frmTools
 
     Private Function GetIdForUser(ByVal strUserName As String) As Integer
 
-        Dim strUserId As String
+        Dim strUserId As String = ""
         Dim intUserId As Integer
 
         Dim strQuery As String = ("select SI_ID from CI_SYSTEMOBJECTS WHERE SI_KIND = 'User' and SI_NAME = '" & strUserName & "'")
         Dim objects As InfoObjects = Me.boInfoStore.Query(strQuery)
         If (objects.ResultCount = 1) Then
             strUserId = objects.Item(1).Properties.Item("SI_ID").Value.ToString
-        Else
-            strUserId = "0"
         End If
-        If Not Integer.TryParse(strUserId, intUserId) Then
-            intUserId = -1
-        End If
+        intUserId = GetIntegerFromString(strUserId)
         Return intUserId
 
+    End Function
+
+    Private Function GetIntegerFromString(ByVal strString As String) As Integer
+        Dim intStringToInt As Integer
+
+        If strString.Trim = "" Then
+            strString = "0"
+        End If
+
+        If Not Integer.TryParse(strString.Trim, intStringToInt) Then
+            intStringToInt = -1
+        End If
+        Return intStringToInt
     End Function
 
     Private Sub btnRepalceOwnerOnAllObjects_Click(sender As Object, e As EventArgs) Handles btnRepalceOwnerOnAllObjects.Click
@@ -321,7 +330,12 @@ Public Class frmTools
 
         Dim strDocID As String
         Dim strNewOwner As String
+        Dim intNewOwner As Integer = 0
         Dim txtOutput As String()
+        Dim blnOwnerIsSameOnAllDocs As Boolean
+        Dim blnRetrievedNewOwnerID As Boolean = False
+
+        blnOwnerIsSameOnAllDocs = Me.chkOwnerIsSameOnAllDocs.Checked
 
         Using MyReader As New Microsoft.VisualBasic.
                       FileIO.TextFieldParser(
@@ -332,15 +346,23 @@ Public Class frmTools
 
             Dim currentRow As String()
             While Not MyReader.EndOfData
+
                 Try
                     currentRow = MyReader.ReadFields()
                     strDocID = currentRow(0)
                     strNewOwner = currentRow(1)
 
+                    If blnOwnerIsSameOnAllDocs Then
+                        If Not blnRetrievedNewOwnerID Then
+                            intNewOwner = Me.GetIdForUser(strNewOwner)
+                            blnRetrievedNewOwnerID = True
+                        End If
+                    End If
+
                     txtOutput = {"Found record to process from CSV: SI_ID: ", strDocID, ", Owner: ", strNewOwner, ChrW(13) & ChrW(10)}
                     Me.rtbOutput.AppendText(String.Concat(txtOutput))
 
-                    UpdateOwnerOnObject(strDocID, strNewOwner)
+                    UpdateOwnerOnObject(strDocID, strNewOwner, intNewOwner)
 
                 Catch ex As Microsoft.VisualBasic.
                             FileIO.MalformedLineException
@@ -353,13 +375,20 @@ Public Class frmTools
 
     End Sub
 
-    Private Sub UpdateOwnerOnObject(strDocID As String, strNewOwner As String)
+    Private Sub UpdateOwnerOnObject(strDocID As String, strNewOwner As String, Optional intNewOwner As Integer = 0)
 
         Me.NewBOSession()
 
-        Dim intOwnerIdNew As Integer = Me.GetIdForUser(strNewOwner)
+        Dim intOwnerIdNew As Integer
+        If intNewOwner = 0 Then
+            intOwnerIdNew = Me.GetIdForUser(strNewOwner)
+        Else
+            intOwnerIdNew = intNewOwner
+        End If
 
         If (intOwnerIdNew > 0) Then
+
+            Dim blnUpdateMade As Boolean = False
 
             Dim strQuery As String = ("select * from ci_infoobjects where si_id = " & strDocID)
             Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
@@ -370,35 +399,50 @@ Public Class frmTools
                     enumerator = infoObjects.GetEnumerator
                     Do While enumerator.MoveNext
                         Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
-                        Dim strUserId As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                         Dim strObjectName As String = objCurrentObject.Properties.Item("SI_NAME").Value.ToString
                         Dim strObjectKind As String = objCurrentObject.Properties.Item("SI_KIND").Value.ToString
+                        Dim strOwnerId As String = objCurrentObject.Properties.Item("SI_OWNERID").Value.ToString
+                        Dim intOwnerId As Integer = Me.GetIntegerFromString(strOwnerId)
                         Dim blnIsInstance As Boolean = objCurrentObject.Instance
-                        Dim strObjectId As String = objCurrentObject.Properties.Item("SI_ID").Value.ToString
 
                         'If instance, also set the submitterid field, if the field exists
                         If blnIsInstance Then
 
                             'This property may not exist
                             Dim strSubmitterId As String = ""
+
                             Try
                                 strSubmitterId = objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value.ToString()
                             Catch ex As Exception
                                 Exit Try
                             End Try
 
-                            If strSubmitterId <> "" Then
+                            Dim intSubmitterId As Integer
+                            intSubmitterId = Me.GetIntegerFromString(strSubmitterId)
+
+                            If intSubmitterId <> intOwnerIdNew Then
                                 objCurrentObject.SchedulingInfo.Properties.Item("SI_SUBMITTERID").Value = intOwnerIdNew
+                                blnUpdateMade = True
                             End If
+
                         End If
 
-                        objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
-                        objCurrentObject.Properties.Item("SI_UPDATE_TS").Value = Date.Now
+                        If intOwnerId <> intOwnerIdNew Then
+                            objCurrentObject.Properties.Item("SI_OWNERID").Value = intOwnerIdNew
+                            blnUpdateMade = True
+                        End If
 
-                        Dim txtOutput As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
-                        Me.rtbOutput.AppendText(String.Concat(txtOutput))
+                        If blnUpdateMade Then
+                            objCurrentObject.Properties.Item("SI_UPDATE_TS").Value = Date.Now
+                            Dim txtOutput As String() = New String() {"Object updated: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
+                            Me.rtbOutput.AppendText(String.Concat(txtOutput))
 
-                        Me.boInfoStore.Commit(infoObjects)
+                            Me.boInfoStore.Commit(infoObjects)
+                        Else
+                            Dim txtOutput As String() = New String() {"Object not updated, no changes found: (", strObjectKind, ") ", strObjectName, ChrW(13) & ChrW(10)}
+                            Me.rtbOutput.AppendText(String.Concat(txtOutput))
+                        End If
+
                     Loop
                 Finally
                     If TypeOf enumerator Is IDisposable Then

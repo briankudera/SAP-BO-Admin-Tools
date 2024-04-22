@@ -87,6 +87,8 @@ Partial Class frmTools
         Me.tabResetAdminPW = New System.Windows.Forms.TabPage()
         Me.btnResetAdminPW = New System.Windows.Forms.Button()
         Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
+        Me.Label22 = New System.Windows.Forms.Label()
+        Me.Label21 = New System.Windows.Forms.Label()
         Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
         Me.btnUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.Button()
         Me.tabLoadObjectPropertiesToDB = New System.Windows.Forms.TabPage()
@@ -103,6 +105,7 @@ Partial Class frmTools
         Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
+        Me.chkOwnerIsSameOnAllDocs = New System.Windows.Forms.CheckBox()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -674,6 +677,9 @@ Partial Class frmTools
         '
         'tabUpdateOwnersOnDocsFromCSV
         '
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.chkOwnerIsSameOnAllDocs)
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.Label22)
+        Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.Label21)
         Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.txtCSVFilePath)
         Me.tabUpdateOwnersOnDocsFromCSV.Controls.Add(Me.btnUpdateOwnersOnDocsFromCSV)
         Me.tabUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(4, 22)
@@ -684,19 +690,38 @@ Partial Class frmTools
         Me.tabUpdateOwnersOnDocsFromCSV.Text = "Update Owners On Docs from CSV"
         Me.tabUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
         '
+        'Label22
+        '
+        Me.Label22.Location = New System.Drawing.Point(6, 17)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(105, 23)
+        Me.Label22.TabIndex = 24
+        Me.Label22.Text = "File Location:"
+        Me.Label22.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'Label21
+        '
+        Me.Label21.Location = New System.Drawing.Point(3, 60)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(261, 29)
+        Me.Label21.TabIndex = 23
+        Me.Label21.Text = "File Format: CSV SI_ID,NewOwnerName (No Header)"
+        Me.Label21.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
         'txtCSVFilePath
         '
-        Me.txtCSVFilePath.Location = New System.Drawing.Point(44, 38)
+        Me.txtCSVFilePath.Location = New System.Drawing.Point(79, 19)
         Me.txtCSVFilePath.Name = "txtCSVFilePath"
-        Me.txtCSVFilePath.Size = New System.Drawing.Size(193, 20)
+        Me.txtCSVFilePath.ReadOnly = True
+        Me.txtCSVFilePath.Size = New System.Drawing.Size(274, 20)
         Me.txtCSVFilePath.TabIndex = 1
         Me.txtCSVFilePath.Text = "C:\SAP\ListOfObjectsAndOwner.txt"
         '
         'btnUpdateOwnersOnDocsFromCSV
         '
-        Me.btnUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(252, 32)
+        Me.btnUpdateOwnersOnDocsFromCSV.Location = New System.Drawing.Point(354, 13)
         Me.btnUpdateOwnersOnDocsFromCSV.Name = "btnUpdateOwnersOnDocsFromCSV"
-        Me.btnUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(252, 31)
+        Me.btnUpdateOwnersOnDocsFromCSV.Size = New System.Drawing.Size(179, 31)
         Me.btnUpdateOwnersOnDocsFromCSV.TabIndex = 0
         Me.btnUpdateOwnersOnDocsFromCSV.Text = "Update Owners on Docs from CSV"
         Me.btnUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
@@ -832,6 +857,16 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
+        'chkOwnerIsSameOnAllDocs
+        '
+        Me.chkOwnerIsSameOnAllDocs.AutoSize = True
+        Me.chkOwnerIsSameOnAllDocs.Location = New System.Drawing.Point(9, 45)
+        Me.chkOwnerIsSameOnAllDocs.Name = "chkOwnerIsSameOnAllDocs"
+        Me.chkOwnerIsSameOnAllDocs.Size = New System.Drawing.Size(149, 17)
+        Me.chkOwnerIsSameOnAllDocs.TabIndex = 25
+        Me.chkOwnerIsSameOnAllDocs.Text = "Owner is same on all docs"
+        Me.chkOwnerIsSameOnAllDocs.UseVisualStyleBackColor = True
+        '
         'frmTools
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -958,4 +993,7 @@ Partial Class frmTools
     Friend WithEvents btnCheckDeltaTsp As Button
     Friend WithEvents Label20 As Label
     Friend WithEvents txtLoadObjectPropertyDelta As TextBox
+    Friend WithEvents Label22 As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents chkOwnerIsSameOnAllDocs As CheckBox
 End Class
