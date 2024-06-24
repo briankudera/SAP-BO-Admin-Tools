@@ -87,6 +87,7 @@ Partial Class frmTools
         Me.tabResetAdminPW = New System.Windows.Forms.TabPage()
         Me.btnResetAdminPW = New System.Windows.Forms.Button()
         Me.tabUpdateOwnersOnDocsFromCSV = New System.Windows.Forms.TabPage()
+        Me.chkOwnerIsSameOnAllDocs = New System.Windows.Forms.CheckBox()
         Me.Label22 = New System.Windows.Forms.Label()
         Me.Label21 = New System.Windows.Forms.Label()
         Me.txtCSVFilePath = New System.Windows.Forms.TextBox()
@@ -105,7 +106,11 @@ Partial Class frmTools
         Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
         Me.rtbOutput = New System.Windows.Forms.RichTextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.chkOwnerIsSameOnAllDocs = New System.Windows.Forms.CheckBox()
+        Me.tabDeleteReportsBySIID = New System.Windows.Forms.TabPage()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.Label24 = New System.Windows.Forms.Label()
+        Me.txtFileNameLocationForDeletes = New System.Windows.Forms.TextBox()
+        Me.btnDeleteReportsFromFile = New System.Windows.Forms.Button()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -123,6 +128,7 @@ Partial Class frmTools
         Me.tabResetAdminPW.SuspendLayout()
         Me.tabUpdateOwnersOnDocsFromCSV.SuspendLayout()
         Me.tabLoadObjectPropertiesToDB.SuspendLayout()
+        Me.tabDeleteReportsBySIID.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -163,7 +169,7 @@ Partial Class frmTools
         'cboCMSServer
         '
         Me.cboCMSServer.FormattingEnabled = True
-        Me.cboCMSServer.Items.AddRange(New Object() {"MSP-BICMS01:6400", "TST-BICMS:6400"})
+        Me.cboCMSServer.Items.AddRange(New Object() {"MSP-BILUM01:6400", "TST-BICMS:6400"})
         Me.cboCMSServer.Location = New System.Drawing.Point(264, 28)
         Me.cboCMSServer.Name = "cboCMSServer"
         Me.cboCMSServer.Size = New System.Drawing.Size(220, 21)
@@ -225,6 +231,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabResetAdminPW)
         Me.tabFunctions.Controls.Add(Me.tabUpdateOwnersOnDocsFromCSV)
         Me.tabFunctions.Controls.Add(Me.tabLoadObjectPropertiesToDB)
+        Me.tabFunctions.Controls.Add(Me.tabDeleteReportsBySIID)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -690,11 +697,21 @@ Partial Class frmTools
         Me.tabUpdateOwnersOnDocsFromCSV.Text = "Update Owners On Docs from CSV"
         Me.tabUpdateOwnersOnDocsFromCSV.UseVisualStyleBackColor = True
         '
+        'chkOwnerIsSameOnAllDocs
+        '
+        Me.chkOwnerIsSameOnAllDocs.AutoSize = True
+        Me.chkOwnerIsSameOnAllDocs.Location = New System.Drawing.Point(9, 45)
+        Me.chkOwnerIsSameOnAllDocs.Name = "chkOwnerIsSameOnAllDocs"
+        Me.chkOwnerIsSameOnAllDocs.Size = New System.Drawing.Size(149, 17)
+        Me.chkOwnerIsSameOnAllDocs.TabIndex = 25
+        Me.chkOwnerIsSameOnAllDocs.Text = "Owner is same on all docs"
+        Me.chkOwnerIsSameOnAllDocs.UseVisualStyleBackColor = True
+        '
         'Label22
         '
         Me.Label22.Location = New System.Drawing.Point(6, 17)
         Me.Label22.Name = "Label22"
-        Me.Label22.Size = New System.Drawing.Size(105, 23)
+        Me.Label22.Size = New System.Drawing.Size(81, 23)
         Me.Label22.TabIndex = 24
         Me.Label22.Text = "File Location:"
         Me.Label22.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -710,10 +727,10 @@ Partial Class frmTools
         '
         'txtCSVFilePath
         '
-        Me.txtCSVFilePath.Location = New System.Drawing.Point(79, 19)
+        Me.txtCSVFilePath.Location = New System.Drawing.Point(99, 19)
         Me.txtCSVFilePath.Name = "txtCSVFilePath"
         Me.txtCSVFilePath.ReadOnly = True
-        Me.txtCSVFilePath.Size = New System.Drawing.Size(274, 20)
+        Me.txtCSVFilePath.Size = New System.Drawing.Size(249, 20)
         Me.txtCSVFilePath.TabIndex = 1
         Me.txtCSVFilePath.Text = "C:\SAP\ListOfObjectsAndOwner.txt"
         '
@@ -857,15 +874,55 @@ Partial Class frmTools
         Me.Label8.TabIndex = 12
         Me.Label8.Text = "Output"
         '
-        'chkOwnerIsSameOnAllDocs
+        'tabDeleteReportsBySIID
         '
-        Me.chkOwnerIsSameOnAllDocs.AutoSize = True
-        Me.chkOwnerIsSameOnAllDocs.Location = New System.Drawing.Point(9, 45)
-        Me.chkOwnerIsSameOnAllDocs.Name = "chkOwnerIsSameOnAllDocs"
-        Me.chkOwnerIsSameOnAllDocs.Size = New System.Drawing.Size(149, 17)
-        Me.chkOwnerIsSameOnAllDocs.TabIndex = 25
-        Me.chkOwnerIsSameOnAllDocs.Text = "Owner is same on all docs"
-        Me.chkOwnerIsSameOnAllDocs.UseVisualStyleBackColor = True
+        Me.tabDeleteReportsBySIID.Controls.Add(Me.Label23)
+        Me.tabDeleteReportsBySIID.Controls.Add(Me.Label24)
+        Me.tabDeleteReportsBySIID.Controls.Add(Me.txtFileNameLocationForDeletes)
+        Me.tabDeleteReportsBySIID.Controls.Add(Me.btnDeleteReportsFromFile)
+        Me.tabDeleteReportsBySIID.Location = New System.Drawing.Point(4, 22)
+        Me.tabDeleteReportsBySIID.Name = "tabDeleteReportsBySIID"
+        Me.tabDeleteReportsBySIID.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabDeleteReportsBySIID.Size = New System.Drawing.Size(550, 92)
+        Me.tabDeleteReportsBySIID.TabIndex = 10
+        Me.tabDeleteReportsBySIID.Text = "Delete Reports by SI_ID"
+        Me.tabDeleteReportsBySIID.UseVisualStyleBackColor = True
+        '
+        'Label23
+        '
+        Me.Label23.Location = New System.Drawing.Point(13, 12)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(76, 23)
+        Me.Label23.TabIndex = 28
+        Me.Label23.Text = "File Location:"
+        Me.Label23.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'Label24
+        '
+        Me.Label24.Location = New System.Drawing.Point(13, 47)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(261, 29)
+        Me.Label24.TabIndex = 27
+        Me.Label24.Text = "File Format: SI_ID (No Header)"
+        Me.Label24.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtFileNameLocationForDeletes
+        '
+        Me.txtFileNameLocationForDeletes.Location = New System.Drawing.Point(95, 15)
+        Me.txtFileNameLocationForDeletes.Name = "txtFileNameLocationForDeletes"
+        Me.txtFileNameLocationForDeletes.ReadOnly = True
+        Me.txtFileNameLocationForDeletes.Size = New System.Drawing.Size(248, 20)
+        Me.txtFileNameLocationForDeletes.TabIndex = 26
+        Me.txtFileNameLocationForDeletes.Text = "C:\SAP\ListOfSIIDsToDelete.txt"
+        '
+        'btnDeleteReportsFromFile
+        '
+        Me.btnDeleteReportsFromFile.Location = New System.Drawing.Point(361, 8)
+        Me.btnDeleteReportsFromFile.Name = "btnDeleteReportsFromFile"
+        Me.btnDeleteReportsFromFile.Size = New System.Drawing.Size(179, 31)
+        Me.btnDeleteReportsFromFile.TabIndex = 25
+        Me.btnDeleteReportsFromFile.Text = "Delete Reports from File"
+        Me.btnDeleteReportsFromFile.UseVisualStyleBackColor = True
         '
         'frmTools
         '
@@ -917,6 +974,8 @@ Partial Class frmTools
         Me.tabUpdateOwnersOnDocsFromCSV.PerformLayout()
         Me.tabLoadObjectPropertiesToDB.ResumeLayout(False)
         Me.tabLoadObjectPropertiesToDB.PerformLayout()
+        Me.tabDeleteReportsBySIID.ResumeLayout(False)
+        Me.tabDeleteReportsBySIID.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -996,4 +1055,9 @@ Partial Class frmTools
     Friend WithEvents Label22 As Label
     Friend WithEvents Label21 As Label
     Friend WithEvents chkOwnerIsSameOnAllDocs As CheckBox
+    Friend WithEvents tabDeleteReportsBySIID As TabPage
+    Friend WithEvents Label23 As Label
+    Friend WithEvents Label24 As Label
+    Friend WithEvents txtFileNameLocationForDeletes As TextBox
+    Friend WithEvents btnDeleteReportsFromFile As Button
 End Class

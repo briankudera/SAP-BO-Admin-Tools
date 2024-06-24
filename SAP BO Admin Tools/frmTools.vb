@@ -1,8 +1,8 @@
 ﻿Imports CrystalDecisions.Enterprise
 Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
-Imports System.IO
 Imports log4net
+Imports File = System.IO.File
 
 <Assembly: log4net.Config.XmlConfigurator(
       ConfigFile:="Log4Net.config", Watch:=True)>
@@ -1989,6 +1989,80 @@ Public Class frmTools
         strQuery = strQuery & "; "
         ExecuteQuery(strQuery)
 
+
+    End Sub
+
+    Private Sub btnDeleteReportsFromFile_Click(sender As Object, e As EventArgs) Handles btnDeleteReportsFromFile.Click
+
+        Dim txtOutput As String()
+        Dim siIdsFilePath As String = Me.txtFileNameLocationForDeletes.Text
+
+        ' Read SI_IDs from the file
+        Dim siIdsToDelete As String()
+        Try
+            siIdsToDelete = File.ReadAllLines(siIdsFilePath).
+                Where(Function(line) Not String.IsNullOrWhiteSpace(line)).
+                Select(Function(line) line.Trim()).
+                ToArray()
+        Catch ex As Exception
+            Me.rtbOutput.AppendText($"Error reading file: {ex.Message}")
+            Return
+        End Try
+
+        If siIdsToDelete.Length = 0 Then
+            Me.rtbOutput.AppendText("No valid SI_IDs found In the file.")
+            Return
+        End If
+
+        Try
+            ' Connect to the CMS
+            Me.NewBOSession()
+
+            ' Build the query to fetch Webi reports with the specified SI_IDs
+            Dim strQuery As String = $"SELECT SI_ID FROM CI_INFOOBJECTS WHERE SI_KIND='Webi' AND ({String.Join(" OR ", siIdsToDelete.Select(Function(id) $"SI_ID='{id}'"))})"
+            Me.rtbOutput.AppendText(String.Concat(strQuery, ChrW(13) & ChrW(10), ChrW(13) & ChrW(10)))
+            Dim infoObjects As InfoObjects = Me.boInfoStore.Query(strQuery)
+
+            ' Delete the reports
+            Dim deletedCount As Integer = 0
+
+            If infoObjects.Count > 0 Then
+
+                Dim enumerator As IEnumerator
+
+                enumerator = infoObjects.GetEnumerator
+                Do While enumerator.MoveNext
+                    Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
+
+                    txtOutput = {"Marking report for deletion with SI_ID: ", objCurrentObject.ID, ChrW(13) & ChrW(10)}
+                    Me.rtbOutput.AppendText(String.Concat(txtOutput))
+                    deletedCount += 1
+                    objCurrentObject.DeleteNow()
+                Loop
+
+                txtOutput = {"Deletion process completed. Number of deletes: ", deletedCount, ChrW(13) & ChrW(10)}
+                Me.rtbOutput.AppendText(String.Concat(txtOutput))
+
+                Me.boInfoStore.Commit(infoObjects)
+
+            Else
+                txtOutput = {"No matching reports found for deletion.", ChrW(13) & ChrW(10)}
+                Me.rtbOutput.AppendText(String.Concat(txtOutput))
+            End If
+
+        Catch ex As Exception
+            txtOutput = {$"An error occurred: {ex.Message}", ChrW(13) & ChrW(10)}
+            Me.rtbOutput.AppendText(String.Concat(txtOutput))
+        Finally
+            If Me.boEnterpriseSession IsNot Nothing Then
+                Try
+                    Me.LogoffBOSession()
+                Catch ex As Exception
+                    txtOutput = {$"Error during logoff: {ex.Message}", ChrW(13) & ChrW(10)}
+                    Me.rtbOutput.AppendText(String.Concat(txtOutput))
+                End Try
+            End If
+        End Try
 
     End Sub
 
