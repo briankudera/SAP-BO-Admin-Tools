@@ -3,6 +3,9 @@ Imports System.Data.SqlClient
 Imports CrystalDecisions.Enterprise.Desktop
 Imports log4net
 Imports File = System.IO.File
+Imports System.Globalization
+Imports System.IO
+Imports System.Security
 
 <Assembly: log4net.Config.XmlConfigurator(
       ConfigFile:="Log4Net.config", Watch:=True)>
@@ -2065,6 +2068,148 @@ Public Class frmTools
         End Try
 
     End Sub
+
+    Private Sub RescheduleInstancesFromCSV(csvFilePath As String)
+        logger.Info($"Starting to process CSV file: {csvFilePath}")
+
+        ' Read the CSV file
+        Dim lines() As String
+        Try
+            lines = File.ReadAllLines(csvFilePath)
+        Catch ex As IOException
+            Dim errorMsg As String = $"Error reading CSV file: {ex.Message}"
+            Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+            logger.Error(errorMsg)
+            Return
+        End Try
+
+        ' Loop through each line in the CSV file (skipping the header)
+        For i As Integer = 1 To lines.Length - 1
+            Dim line As String = lines(i)
+            Dim columns() As String = line.Split(","c)
+
+            ' Ensure there are enough columns
+            If columns.Length < 3 Then
+                Dim errorMsg As String = $"Malformed CSV line: {line}"
+                Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+                logger.Warn(errorMsg)
+                Continue For
+            End If
+
+            ' Extract data from each column
+            Dim username As String = columns(0).Trim()
+            Dim siId As String = columns(1).Trim()
+            Dim datetimePart As String = columns(2).Trim()
+
+            ' Parse the combined date and time into a DateTime object
+            Dim newStartDateTime As DateTime
+            Dim formats() As String = {
+                "yyyy-MM-dd h:mm tt", "MM/dd/yyyy HH:mm", "MMMM dd, yyyy h:mm tt",
+                "MM/dd/yyyy h:mm tt", "yyyy-MM-dd HH:mm", "yyyy-MM-ddTHH:mm:ss",
+                "dd/MM/yyyy HH:mm", "M/d/yyyy h:mm tt", "M/d/yyyy H:mm",
+                "MM/dd/yyyy h:mm tt", "yyyy-MM-ddTHH:mm:ss", "h:mm tt dd/MM/yyyy",
+                "h:mm tt yyyy-MM-dd", "HH:mm yyyy-MM-dd", "dd/MM/yyyy h:mm tt",
+                "yyyy-MM-dd hh:mmtt", "MM/dd/yyyy hh:mmtt"  ' Added formats without space between time and AM/PM
+            }
+
+            ' Try to parse using different formats
+            If Not DateTime.TryParseExact(datetimePart, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, newStartDateTime) Then
+                ' Fallback to regular parsing if exact parsing fails
+                If Not DateTime.TryParse(datetimePart, newStartDateTime) Then
+                    Dim errorMsg As String = $"Error parsing date and time for SI_ID {siId} on line: {line}"
+                    Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+                    logger.Error(errorMsg)
+                    Continue For
+                End If
+            End If
+
+            ' Log the start of the instance rescheduling process
+            logger.Info($"Starting rescheduling for SI_ID: {siId}, Username: {username}, New Start Time: {newStartDateTime}")
+
+            ' Call the method to reschedule the instance with the parsed DateTime
+            RescheduleInstance(username, siId, newStartDateTime)
+
+            logger.Info($"Finished rescheduling for SI_ID: {siId}")
+        Next
+
+        logger.Info($"Finished processing CSV file: {csvFilePath}")
+    End Sub
+
+    Private Sub RescheduleInstance(username As String, siId As String, newStartDateTime As DateTime)
+        Dim cmsName As String = Me.cboCMSServer.SelectedItem.ToString()
+        Dim password As String = Me.txtCMSUserPassword.Text.ToString()
+        Dim authType As String = "secEnterprise"
+
+        Try
+            ' Logon to the CMS
+            Dim sessionMgr As New SessionMgr()
+            Dim enterpriseSession As EnterpriseSession = sessionMgr.Logon(username, password, cmsName, authType)
+
+            ' Access the InfoStore service
+            Dim boInfoStore As InfoStore = CType(enterpriseSession.GetService("InfoStore"), InfoStore)
+
+            ' Query for the specific instance using SI_ID
+            Dim strQuery As String = "SELECT * FROM CI_INFOOBJECTS WHERE SI_ID = " & siId
+            Dim infoObjects As InfoObjects = boInfoStore.Query(strQuery)
+
+            ' Check if the instance exists
+            If infoObjects.Count > 0 Then
+                Dim enumerator As IEnumerator = infoObjects.GetEnumerator()
+                Try
+                    Do While enumerator.MoveNext()
+                        ' Retrieve the current InfoObject
+                        Dim objCurrentObject As InfoObject = DirectCast(enumerator.Current, InfoObject)
+
+                        ' Update the scheduling info with the new start time
+                        objCurrentObject.SchedulingInfo.Properties.Item("SI_STARTTIME").Value = newStartDateTime
+                        objCurrentObject.SchedulingInfo.Properties.Item("SI_RECURRING").Value = 1
+
+                        ' Optionally update other properties, such as the update timestamp
+                        objCurrentObject.Properties.Item("SI_UPDATE_TS").Value = Date.Now
+                    Loop
+                Finally
+                    ' Dispose of the enumerator properly
+                    If TypeOf enumerator Is IDisposable Then
+                        DirectCast(enumerator, IDisposable).Dispose()
+                    End If
+                End Try
+
+                ' Commit the changes to the InfoStore
+                boInfoStore.Commit(infoObjects)
+
+                ' Write success message to the RichTextBox and log4net
+                Dim successMsg As String = $"Instance with SI_ID {siId} has been rescheduled to {newStartDateTime}."
+                Me.rtbOutput.AppendText(successMsg & ChrW(13) & ChrW(10))
+                logger.Info(successMsg)
+
+            Else
+                ' Write "not found" message to the RichTextBox and log4net
+                Dim notFoundMsg As String = $"No instance found with SI_ID {siId}."
+                Me.rtbOutput.AppendText(notFoundMsg & ChrW(13) & ChrW(10))
+                logger.Warn(notFoundMsg)
+            End If
+
+        Catch ex As UnauthorizedAccessException
+            Dim errorMsg As String = $"Unauthorized access error for SI_ID {siId}: {ex.Message}"
+            Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+            logger.Error(errorMsg)
+        Catch ex As SecurityException
+            Dim errorMsg As String = $"Security error for SI_ID {siId}: {ex.Message}"
+            Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+            logger.Error(errorMsg)
+        Catch ex As Exception
+            ' Write generic error message to the RichTextBox and log4net
+            Dim errorMsg As String = $"Error processing SI_ID {siId}: {ex.Message}"
+            Me.rtbOutput.AppendText(errorMsg & ChrW(13) & ChrW(10))
+            logger.Error(errorMsg)
+        End Try
+    End Sub
+
+    Private Sub btnRescheduleInstance_Click(sender As Object, e As EventArgs) Handles btnRescheduleInstance.Click
+        RescheduleInstancesFromCSV(Me.txtRescheduleFileList.Text)
+    End Sub
+
+
 
     'Sub CleanRepoOrphans()
 

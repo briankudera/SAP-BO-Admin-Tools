@@ -104,13 +104,18 @@ Partial Class frmTools
         Me.txtLoadObjectPropertiesServer = New System.Windows.Forms.TextBox()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.btnLoadObjectPropertiesToDB = New System.Windows.Forms.Button()
-        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
-        Me.Label8 = New System.Windows.Forms.Label()
         Me.tabDeleteReportsBySIID = New System.Windows.Forms.TabPage()
         Me.Label23 = New System.Windows.Forms.Label()
         Me.Label24 = New System.Windows.Forms.Label()
         Me.txtFileNameLocationForDeletes = New System.Windows.Forms.TextBox()
         Me.btnDeleteReportsFromFile = New System.Windows.Forms.Button()
+        Me.rtbOutput = New System.Windows.Forms.RichTextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.tabRescheduleInstance = New System.Windows.Forms.TabPage()
+        Me.Label25 = New System.Windows.Forms.Label()
+        Me.Label26 = New System.Windows.Forms.Label()
+        Me.txtRescheduleFileList = New System.Windows.Forms.TextBox()
+        Me.btnRescheduleInstance = New System.Windows.Forms.Button()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabFunctions.SuspendLayout()
         Me.tabListObjectsByOwner.SuspendLayout()
@@ -129,6 +134,7 @@ Partial Class frmTools
         Me.tabUpdateOwnersOnDocsFromCSV.SuspendLayout()
         Me.tabLoadObjectPropertiesToDB.SuspendLayout()
         Me.tabDeleteReportsBySIID.SuspendLayout()
+        Me.tabRescheduleInstance.SuspendLayout()
         Me.SuspendLayout()
         '
         'LogoPictureBox
@@ -232,6 +238,7 @@ Partial Class frmTools
         Me.tabFunctions.Controls.Add(Me.tabUpdateOwnersOnDocsFromCSV)
         Me.tabFunctions.Controls.Add(Me.tabLoadObjectPropertiesToDB)
         Me.tabFunctions.Controls.Add(Me.tabDeleteReportsBySIID)
+        Me.tabFunctions.Controls.Add(Me.tabRescheduleInstance)
         Me.tabFunctions.Location = New System.Drawing.Point(8, 149)
         Me.tabFunctions.Name = "tabFunctions"
         Me.tabFunctions.SelectedIndex = 0
@@ -857,23 +864,6 @@ Partial Class frmTools
         Me.btnLoadObjectPropertiesToDB.Text = "Extract Repo"
         Me.btnLoadObjectPropertiesToDB.UseVisualStyleBackColor = True
         '
-        'rtbOutput
-        '
-        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
-        Me.rtbOutput.Name = "rtbOutput"
-        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
-        Me.rtbOutput.TabIndex = 11
-        Me.rtbOutput.Text = ""
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(8, 274)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(39, 13)
-        Me.Label8.TabIndex = 12
-        Me.Label8.Text = "Output"
-        '
         'tabDeleteReportsBySIID
         '
         Me.tabDeleteReportsBySIID.Controls.Add(Me.Label23)
@@ -923,6 +913,72 @@ Partial Class frmTools
         Me.btnDeleteReportsFromFile.TabIndex = 25
         Me.btnDeleteReportsFromFile.Text = "Delete Reports from File"
         Me.btnDeleteReportsFromFile.UseVisualStyleBackColor = True
+        '
+        'rtbOutput
+        '
+        Me.rtbOutput.Location = New System.Drawing.Point(8, 294)
+        Me.rtbOutput.Name = "rtbOutput"
+        Me.rtbOutput.Size = New System.Drawing.Size(554, 479)
+        Me.rtbOutput.TabIndex = 11
+        Me.rtbOutput.Text = ""
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(8, 274)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(39, 13)
+        Me.Label8.TabIndex = 12
+        Me.Label8.Text = "Output"
+        '
+        'tabRescheduleInstance
+        '
+        Me.tabRescheduleInstance.Controls.Add(Me.Label25)
+        Me.tabRescheduleInstance.Controls.Add(Me.Label26)
+        Me.tabRescheduleInstance.Controls.Add(Me.txtRescheduleFileList)
+        Me.tabRescheduleInstance.Controls.Add(Me.btnRescheduleInstance)
+        Me.tabRescheduleInstance.Location = New System.Drawing.Point(4, 22)
+        Me.tabRescheduleInstance.Name = "tabRescheduleInstance"
+        Me.tabRescheduleInstance.Size = New System.Drawing.Size(550, 92)
+        Me.tabRescheduleInstance.TabIndex = 11
+        Me.tabRescheduleInstance.Text = "Reschedule Instance"
+        Me.tabRescheduleInstance.UseVisualStyleBackColor = True
+        '
+        'Label25
+        '
+        Me.Label25.Location = New System.Drawing.Point(12, 16)
+        Me.Label25.Name = "Label25"
+        Me.Label25.Size = New System.Drawing.Size(76, 23)
+        Me.Label25.TabIndex = 32
+        Me.Label25.Text = "File Location:"
+        Me.Label25.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'Label26
+        '
+        Me.Label26.Location = New System.Drawing.Point(12, 51)
+        Me.Label26.Name = "Label26"
+        Me.Label26.Size = New System.Drawing.Size(289, 29)
+        Me.Label26.TabIndex = 31
+        Me.Label26.Text = "File Format: User,SI_ID,New Start Date Time (No Header)"
+        Me.Label26.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'txtRescheduleFileList
+        '
+        Me.txtRescheduleFileList.Location = New System.Drawing.Point(94, 19)
+        Me.txtRescheduleFileList.Name = "txtRescheduleFileList"
+        Me.txtRescheduleFileList.ReadOnly = True
+        Me.txtRescheduleFileList.Size = New System.Drawing.Size(248, 20)
+        Me.txtRescheduleFileList.TabIndex = 30
+        Me.txtRescheduleFileList.Text = "C:\SAP\ListOfSIIDsToReschedule.txt"
+        '
+        'btnRescheduleInstance
+        '
+        Me.btnRescheduleInstance.Location = New System.Drawing.Point(360, 12)
+        Me.btnRescheduleInstance.Name = "btnRescheduleInstance"
+        Me.btnRescheduleInstance.Size = New System.Drawing.Size(179, 31)
+        Me.btnRescheduleInstance.TabIndex = 29
+        Me.btnRescheduleInstance.Text = "Reschedule Instance"
+        Me.btnRescheduleInstance.UseVisualStyleBackColor = True
         '
         'frmTools
         '
@@ -976,6 +1032,8 @@ Partial Class frmTools
         Me.tabLoadObjectPropertiesToDB.PerformLayout()
         Me.tabDeleteReportsBySIID.ResumeLayout(False)
         Me.tabDeleteReportsBySIID.PerformLayout()
+        Me.tabRescheduleInstance.ResumeLayout(False)
+        Me.tabRescheduleInstance.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1060,4 +1118,9 @@ Partial Class frmTools
     Friend WithEvents Label24 As Label
     Friend WithEvents txtFileNameLocationForDeletes As TextBox
     Friend WithEvents btnDeleteReportsFromFile As Button
+    Friend WithEvents tabRescheduleInstance As TabPage
+    Friend WithEvents Label25 As Label
+    Friend WithEvents Label26 As Label
+    Friend WithEvents txtRescheduleFileList As TextBox
+    Friend WithEvents btnRescheduleInstance As Button
 End Class
